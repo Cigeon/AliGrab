@@ -13,17 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AliGrabApp
+namespace AliGrabApp.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for ExplorerView.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class ExplorerView : UserControl
     {
-        public MainWindow()
+        public ExplorerView()
         {
             InitializeComponent();
         }
-
     }
 }

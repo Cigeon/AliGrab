@@ -1,0 +1,64 @@
+﻿<UserControl x:Class="AliGrabApp.Views.SearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AliGrabApp.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="600">
+    <Grid Background="WhiteSmoke">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="60"/>
+            <ColumnDefinition Width="226*"/>
+            <ColumnDefinition Width="80"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40*"/>
+        </Grid.RowDefinitions>
+
+        <Label x:Name="LabelSearch" 
+               Content="Search:" 
+               HorizontalAlignment="Right" 
+               VerticalAlignment="Stretch"  
+               Height="26" Grid.Column="0" />
+
+        <TextBox x:Name="TextBoxSearch"
+                 Text="{Binding QueryText, UpdateSourceTrigger=PropertyChanged}"
+                 HorizontalAlignment="Stretch" 
+                 VerticalAlignment="Stretch"
+                 Height="24" 
+                 TextWrapping="NoWrap" 
+                 VerticalContentAlignment="Center"
+                 MaxLines="1"
+                 AutomationProperties.IsColumnHeader="True" 
+                 Grid.Column="1">
+            <TextBox.InputBindings>
+                <KeyBinding Command="{Binding Path=SearchCommand}" 
+                            Key="Enter" />
+            </TextBox.InputBindings>
+        </TextBox>
+
+        <Button x:Name="ButtonGo" 
+                Content="Go" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Stretch"  
+                VerticalContentAlignment="Center"
+                Command="{Binding SearchCommand}"
+                ToolTip="Start grabbing" 
+                Height="24" 
+                Width="50" 
+                Grid.Column="2" 
+                Margin="7,0,0,0" >
+            <Button.Style>
+                <Style TargetType="{x:Type Button}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Text.Length, ElementName=TextBoxSearch, UpdateSourceTrigger=PropertyChanged}" Value="0">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+    </Grid>
+</UserControl>
