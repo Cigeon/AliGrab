@@ -38,7 +38,7 @@
                   ScrollViewer.VerticalScrollBarVisibility="Visible"
                   ScrollViewer.HorizontalScrollBarVisibility="Visible"
                   SelectionMode="Extended"
-                  SelectionUnit="Cell">
+                  SelectionUnit="Cell"> 
             <DataGrid.Columns>
 
                 <DataGridTemplateColumn Header="Saved Collections" IsReadOnly="True" Width="*">
@@ -48,8 +48,8 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="10*"/>
                                     <ColumnDefinition Width="50*"/>
-                                    <ColumnDefinition Width="30*"/>
-                                    <ColumnDefinition Width="30*"/>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="40"/>
                                 </Grid.ColumnDefinitions>
                                 
                                 <TextBox IsReadOnly="True" 
@@ -67,24 +67,27 @@
                                      Text="{Binding Name, Mode=OneWay}"
                                      Background="Transparent"
                                      BorderThickness="0"
-                                     Margin="5 20 0 20"
+                                     Margin="5 5 0 5"
                                      HorizontalAlignment="Left"
-                                     VerticalAlignment="Center"/>
+                                     VerticalAlignment="Center"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True" />
 
                                     <TextBox IsReadOnly="True" 
                                      Text="{Binding Created, StringFormat='dd/MM/yyyy HH:mm:ss', Mode=OneWay}"
                                      Background="Transparent"
                                      BorderThickness="0"
-                                     Margin="5 20 20 20"
+                                     Margin="5 5 0 5"
                                      HorizontalAlignment="Left"
-                                     VerticalAlignment="Center"/>
+                                     VerticalAlignment="Center"
+                                     Foreground="DimGray" />
                                 </StackPanel>
 
                                 <Button Command="{Binding Path=DataContext.OpenCollectionCommand, ElementName=ExplorerViewControl}" 
                                     CommandParameter="{Binding Id}"
                                     Width="30"
                                     Height="30"
-                                    Margin="10 20"
+                                    Margin="5 10"
                                     Background="White"
                                     BorderBrush="White"
                                     Foreground="#FF505050"
@@ -93,11 +96,11 @@
                                     ToolTip="Open"
                                     Grid.Column="2" />
 
-                                <Button Command="{Binding Path=DataContext.DeleteCollectionCommand, ElementName=MainViewControl}" 
+                                <Button Command="{Binding Path=DataContext.DeleteCollectionCommand, ElementName=ExplorerViewControl}" 
                                     CommandParameter="{Binding Id}"
                                     Width="30"
                                     Height="30"
-                                    Margin="5 20"
+                                    Margin="5 10"
                                     Background="White"
                                     BorderBrush="White"
                                     Foreground="#FF505050"

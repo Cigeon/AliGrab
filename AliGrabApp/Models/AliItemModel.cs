@@ -25,7 +25,7 @@ namespace AliGrabApp.Models
         public byte[] Image { get; set; }
     }
 
-    public class AukroItem : INotifyPropertyChanged
+    public class AliItem : INotifyPropertyChanged
     {
         private Guid _id;
         private long _aliId;

@@ -74,6 +74,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AliContext.cs" />
+    <Compile Include="Commands\CommandHandler.cs" />
+    <Compile Include="Commands\CommandHandlerParam.cs" />
     <Compile Include="Control\Block.xaml.cs">
       <DependentUpon>Block.xaml</DependentUpon>
     </Compile>
@@ -83,6 +86,11 @@
     <Compile Include="Models\AliGroupModel.cs" />
     <Compile Include="Models\AliItemModel.cs" />
     <Compile Include="Models\UIElementModel.cs" />
+    <Compile Include="ViewModels\ExplorerViewModel.cs" />
+    <Compile Include="ViewModels\ResultViewModel.cs" />
+    <Compile Include="ViewModels\SearchViewModel.cs" />
+    <Compile Include="ViewModels\StatusViewModel.cs" />
+    <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="Views\ExplorerView.xaml.cs">
       <DependentUpon>ExplorerView.xaml</DependentUpon>
     </Compile>

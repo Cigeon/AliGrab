@@ -25,22 +25,26 @@
         <views:SearchView x:Name="SearchViewControl" 
                           HorizontalAlignment="Stretch" 
                           Grid.Row="0" 
-                          Grid.ColumnSpan="2" />
+                          Grid.ColumnSpan="2" 
+                          Loaded="SearchViewControl_OnLoaded" />
         <views:ExplorerView x:Name="ExplorerViewControl" 
                           VerticalAlignment="Stretch"
                           HorizontalAlignment="Stretch"
                           Grid.Row="1" 
-                          Grid.Column="0"/>
+                          Grid.Column="0"
+                          Loaded="ExplorerViewControl_OnLoaded"/>
         <views:ResultView x:Name="ResultViewControl" 
                           VerticalAlignment="Stretch"
                           HorizontalAlignment="Stretch"
                           Grid.Row="1" 
-                          Grid.Column="1"/>
+                          Grid.Column="1"
+                          Loaded="ResultViewControl_OnLoaded"/>
         <views:StatusView x:Name="StatusViewControl" 
                           VerticalAlignment="Stretch"
                           HorizontalAlignment="Stretch"
                           Grid.Row="2" 
                           Grid.Column="0"
-                          Grid.ColumnSpan="2"/>
+                          Grid.ColumnSpan="2"
+                          Loaded="StatusViewControl_OnLoaded"/>
     </Grid>
 </Window>

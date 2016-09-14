@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AliGrabApp.ViewModels;
 
 namespace AliGrabApp
 {
@@ -25,5 +26,28 @@ namespace AliGrabApp
             InitializeComponent();
         }
 
+        private void SearchViewControl_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            var searchViewModel = new SearchViewModel();
+            SearchViewControl.DataContext = searchViewModel;
+        }
+
+        private void ExplorerViewControl_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            var explorerViewModel = new ExplorerViewModel();
+            ExplorerViewControl.DataContext = explorerViewModel;
+        }
+
+        private void ResultViewControl_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            var resultViewModel = new ResultViewModel();
+            ResultViewControl.DataContext = resultViewModel;
+        }
+
+        private void StatusViewControl_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            var statusViewModel = new StatusViewModel();
+            StatusViewControl.DataContext = statusViewModel;
+        }
     }
 }

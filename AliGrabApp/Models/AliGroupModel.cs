@@ -23,7 +23,7 @@ namespace AliGrabApp.Models
         public ObservableCollection<AliItemModel> Items { get; set; }
     }
 
-    public class AukroGroup
+    public class AliGroup
     {
         private Guid _id;
         private DateTime? _created;
