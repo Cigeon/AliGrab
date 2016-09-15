@@ -16,16 +16,21 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 
 namespace AliGrabApp.ViewModels
 {
+    public delegate void ItemsOpenedHandler(ObservableCollection<AliItem> items);
+
     public class ExplorerViewModel : ViewModelBase
     {
         private bool _canExecute;
         //private ICommand _startSearchCommand;
+        private ICommand _testCommand;
         private ICommand _openCollectionCommand;
         private ICommand _deleteCollectionCommand;
         private BackgroundWorker _bw = new BackgroundWorker();
 
         public ControlModel LoadingAnimationModel { get; set; }
         public ObservableCollection<AliGroup> AliGroups { get; set; }
+
+        public static event ItemsOpenedHandler OnItemsOpened;
 
         public ExplorerViewModel()
         {
@@ -94,8 +99,6 @@ namespace AliGrabApp.ViewModels
                         }
 
                         LoadingAnimationModel.Visibility = Visibility.Hidden;
-
-                        Debug.WriteLine("AliGroups count: " + AliGroups.Count);
                     }
                 }
                 catch (SqlException ex)
@@ -177,6 +180,7 @@ namespace AliGrabApp.ViewModels
                     });
                 }
 
+                OnItemsOpened?.Invoke(aliItems);
                 // Open result window ------------------------------------------------------- !!!!
                 /*var resultWindow = new PreviewWindow();
                 resultWindow.AliItems = aliItems;
@@ -200,9 +204,9 @@ namespace AliGrabApp.ViewModels
             }
         }
 
+
         public void DeleteCollection(object param)
         {
-            Debug.WriteLine("command executed!!!!!!!");
             try
             {
                 using (var db = new AliContext())

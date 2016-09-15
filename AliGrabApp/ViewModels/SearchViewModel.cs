@@ -20,6 +20,7 @@ using AngleSharp.Dom.Html;
 namespace AliGrabApp.ViewModels
 {
     public delegate void ItemsGrabbedHandler(ObservableCollection<AliItem> items);
+    public delegate void SearchProgressHandler(ProgressBarModel pb);
 
     public class SearchViewModel : ViewModelBase
     {
@@ -30,13 +31,13 @@ namespace AliGrabApp.ViewModels
         private bool _itemsNotFound = false;
 
         public Window Window { get; set; }
-        //public MainViewModel OwnerViewModel { get; set; } -------------------------------- !!!
-        public ProgressBarModel ProgressBar { get; set; }
+        public ProgressBarModel ProgressBar { get; set; }   //-------------------------------!!!!!!!!!!!
         public ControlModel ButtonGo { get; set; }
         public ObservableCollection<Models.AliItem> AliItems { get; set; }             
         public string QueryText { get; set; }
 
-        public static event ItemsGrabbedHandler OnItemsGrabbed; // = delegate { };
+        public static event ItemsGrabbedHandler OnItemsGrabbed;
+        public static event SearchProgressHandler OnSearchProgress;
 
         public SearchViewModel()
         {
@@ -53,8 +54,7 @@ namespace AliGrabApp.ViewModels
             _bw.ProgressChanged += ProgressChanged;
             _bw.DoWork += DoWork;
             _bw.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
-            // Hide progress bar
-            ProgressBar.Visibility = Visibility.Hidden;
+
         }
 
         public void OnWindowClosed(object sender, EventArgs e)
@@ -240,7 +240,7 @@ namespace AliGrabApp.ViewModels
             var document = parser.Parse(page);
 
             // Greate aukro item for storing data
-            var aukroItem = new AliItem();
+            var aliItem = new AliItem();
 
             // Get all data
             // check for expired item
@@ -254,54 +254,54 @@ namespace AliGrabApp.ViewModels
             }
 
             // Id
-            aukroItem.AliId = long.Parse(
+            aliItem.AliId = long.Parse(
                 document.QuerySelectorAll("p.itemId > span")
                 .First()
                 .Text());
             // Title
-            aukroItem.Title = document.QuerySelectorAll("#siSocialLinks")
+            aliItem.Title = document.QuerySelectorAll("#siSocialLinks")
                 .First()
                 .GetAttribute("data-item-name");
             // Selling type
-            aukroItem.Type = document.QuerySelectorAll("input.show-item-btn")
+            aliItem.Type = document.QuerySelectorAll("input.show-item-btn")
                 .First()
                 .GetAttribute("value");
             // Price
-            aukroItem.Price = double.Parse(
+            aliItem.Price = double.Parse(
                 document.QuerySelectorAll("[itemprop='price']")
                     .First()
                     .GetAttribute("content"),
                 System.Globalization.CultureInfo.InvariantCulture);
             // Price currency
-            aukroItem.PriceCurrency = document.QuerySelectorAll("[itemprop='priceCurrency']")
+            aliItem.PriceCurrency = document.QuerySelectorAll("[itemprop='priceCurrency']")
                 .First()
                 .GetAttribute("content");
             // Seller
-            aukroItem.Seller = document.QuerySelectorAll("div.sellerDetails > dl > dt")
+            aliItem.Seller = document.QuerySelectorAll("div.sellerDetails > dl > dt")
                 .First()
                 .Text()
                 .Replace("Продaвец ", "")
                 .Trim();
-            aukroItem.Seller = aukroItem.Seller.Remove(
-                aukroItem.Seller.IndexOf(" "),
-                aukroItem.Seller.Length - aukroItem.Seller.IndexOf(" "));
+            aliItem.Seller = aliItem.Seller.Remove(
+                aliItem.Seller.IndexOf(" "),
+                aliItem.Seller.Length - aliItem.Seller.IndexOf(" "));
             // Link
-            aukroItem.Link = url;
+            aliItem.Link = url;
             // Description
-            aukroItem.Description = document.QuerySelectorAll("div.deliveryAndPayment > table")
+            aliItem.Description = document.QuerySelectorAll("div.deliveryAndPayment > table")
                 .Last()
                 .Text()
                 .Trim();
             // remove empty lines
-            aukroItem.Description = Regex.Replace(
-                aukroItem.Description,
+            aliItem.Description = Regex.Replace(
+                aliItem.Description,
                 @"^\s+$[\r\n]*",
                 "",
                 RegexOptions.Multiline);
             // remove spaces from each lines
-            aukroItem.Description = string.Join(
+            aliItem.Description = string.Join(
                 "\n",
-                aukroItem.Description.Split('\n').Select(s => s.Trim()));
+                aliItem.Description.Split('\n').Select(s => s.Trim()));
             // Image
             // get image link
             var imgUrl = "";
@@ -325,15 +325,15 @@ namespace AliGrabApp.ViewModels
             // load image
             try
             {
-                aukroItem.Image = new WebClient().DownloadData(imgUrl);                  // async
+                aliItem.Image = new WebClient().DownloadData(imgUrl);                  // async
             }
             catch (WebException)
             {
                 // load default image
-                aukroItem.Image = new WebClient().DownloadData("http://static.allegrostatic.pl/site_images/209/0/layout/showItemNoPhoto.png");
+                aliItem.Image = new WebClient().DownloadData("http://static.allegrostatic.pl/site_images/209/0/layout/showItemNoPhoto.png");
             }
 
-            return aukroItem;
+            return aliItem;
         }
     
 
@@ -534,15 +534,17 @@ namespace AliGrabApp.ViewModels
             // Set current progress
             ProgressBar.Value = e.ProgressPercentage;
             ProgressBar.Content = e.UserState;
+            // Send current progress to status view
+            OnSearchProgress?.Invoke(ProgressBar);
         }
 
         private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-
-            // clear progress bar
+            // clear and hide progress bar
             ProgressBar.Content = "";
-            // Hide progress bar
             ProgressBar.Visibility = Visibility.Hidden;
+            // Send current progress to status view
+            OnSearchProgress?.Invoke(ProgressBar);
 
             if (_itemsNotFound)
             {
@@ -562,19 +564,10 @@ namespace AliGrabApp.ViewModels
                                 MessageBoxButton.OK, 
                                 MessageBoxImage.Information);
 
-
+                // Send grabbed items to result view
                 OnItemsGrabbed?.Invoke(AliItems);
-
-                // Open result window --------------------------------------------------------  !!!!
-                //var resultWindow = new ResultWindow();
-                //resultWindow.AukroItems = AukroItems;
-                //resultWindow.QueryText = QueryText;
-                //resultWindow.Show();
             }
 
-            // Close current window -----------------------------------------------------------------------  !!!!
-            //foreach (Window window in Application.Current.Windows.OfType<SearchWindow>())
-            //    ((SearchWindow)window).Close();
         }
 
         public ICommand SearchCommand
@@ -594,6 +587,8 @@ namespace AliGrabApp.ViewModels
                 // Show progress bar
                 ProgressBar.Value = 0;
                 ProgressBar.Visibility = Visibility.Visible;
+                // Send current progress to status view
+                OnSearchProgress?.Invoke(ProgressBar);
                 // Disable start button
                 ButtonGo.IsEnabled = false;
             }

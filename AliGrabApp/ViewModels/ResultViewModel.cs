@@ -44,6 +44,7 @@ namespace AliGrabApp.ViewModels
             ProgressBar = new ProgressBarModel();
             StatusBar = new StatusBarModel();
             Buttons = new ButtonModel();
+            AliItems = new ObservableCollection<AliItem>();
             // Commands status
             _canExecute = true;
             // Background worker1 settings
@@ -66,8 +67,10 @@ namespace AliGrabApp.ViewModels
             Buttons.IsEnabled = true;
             // Subscribe on all items grabbed event
             SearchViewModel.OnItemsGrabbed += ShowResult;
+            // Subscribe on open saved items event
+            ExplorerViewModel.OnItemsOpened += ShowResult;
         }
-        
+
 
         public void OnWindowClosed(object sender, EventArgs e)
         {
@@ -78,11 +81,21 @@ namespace AliGrabApp.ViewModels
 
         private void ShowResult(ObservableCollection<AliItem> items)
         {
-            AliItems = items;
-            Debug.WriteLine("Event handled!!!!!");
-            foreach (var item in AliItems)
+            AliItems.Clear();
+            foreach (var item in items)
             {
-                Debug.WriteLine(item.AliId);
+                AliItems.Add(new AliItem
+                {
+                    Image = item.Image,
+                    AliId = item.AliId,
+                    Title = item.Title,
+                    Type = item.Type,
+                    Seller = item.Seller,
+                    Price = item.Price,
+                    PriceCurrency = item.PriceCurrency,
+                    Description = item.Description,
+                    Link = item.Link
+                });
             }
         }
 

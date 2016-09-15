@@ -20,12 +20,12 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <DataGrid ItemsSource="{Binding AliItems}"
+
+        <DataGrid x:Name="dataGrid"
+                  ItemsSource="{Binding AliItems}"
                   AutoGenerateColumns="False"
-                  RowHeight="160"
+                  RowHeight="100"
                   GridLinesVisibility="Horizontal" 
                   HorizontalGridLinesBrush="LightGray"
                   CanUserAddRows="false"
@@ -44,7 +44,7 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Image Source="{Binding Image}" 
-                                   Height="150"
+                                   Height="90"
                                    Margin="5"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
@@ -125,7 +125,7 @@
                 <DataGridTemplateColumn Header="Description" IsReadOnly="True" Width="300">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ScrollViewer Margin="20">
+                            <ScrollViewer Margin="10">
                                 <TextBox IsReadOnly="True" 
                                      Text="{Binding Description, Mode=OneWay}"
                                      Background="Transparent"
@@ -145,7 +145,7 @@
                             <EventSetter Event="Hyperlink.Click" Handler="DG_Hyperlink_Click"/>
                             <Setter Property="FrameworkElement.VerticalAlignment" Value="Center"/>
                             <Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
-                            <Setter Property="FrameworkElement.Margin" Value="30"/>
+                            <Setter Property="FrameworkElement.Margin" Value="10"/>
                         </Style>
                     </DataGridHyperlinkColumn.ElementStyle>
                 </DataGridHyperlinkColumn>
@@ -167,12 +167,12 @@
                     Content="Export"
                     Width="60"
                     HorizontalAlignment="Right" 
-                    Margin="10 0 30 25" 
+                    Margin="10 0 40 25" 
                     VerticalAlignment="Bottom" 
                     Command="{Binding ExportCommand}"
                     IsEnabled="{Binding Buttons.IsEnabled}"
                     ToolTip="Export items to Excel"/>
         </StackPanel>
-        <StackPanel Grid.Row="2"/>
+        <!--<StackPanel Grid.Row="2"/>-->
     </Grid>
 </UserControl>
