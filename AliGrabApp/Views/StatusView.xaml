@@ -7,22 +7,37 @@
              mc:Ignorable="d" 
              d:DesignHeight="22" d:DesignWidth="300">
     <Grid Background="WhiteSmoke">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="127*"/>
+            <ColumnDefinition Width="60"/>
+        </Grid.ColumnDefinitions>
         <ProgressBar x:Name="ProgressBarStatus"
-                     Value="{Binding ProgressBar.Percentage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
+                     Value="{Binding ProgressBar.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
                      Visibility="{Binding ProgressBar.Visibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"   
                      HorizontalAlignment="Stretch" 
                      VerticalAlignment="Stretch"
                      Height="20"
-                     Margin="7 0 7 0"
+                     Margin="7,1"
                      Grid.Row="0"
-                     Grid.ZIndex ="1"/>
+                     Grid.Column="0"
+                     Grid.ZIndex ="1" />
         <TextBlock x:Name="TextProgressBar" 
-                   Text="{Binding ProgressBar.Progress, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                   Visibility="{Binding ProgressBar.Visibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                   Text="{Binding ProgressBar.Content, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Center"
-                   Margin="20,0,0,0"
+                   Margin="7,3,0,3"
                    Grid.Row="0"
                    Grid.ZIndex ="2"/>
+        <Button x:Name="BtnCancel" 
+                Content="Cancel"
+                Grid.Column="1" 
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Stretch"
+                Height="20" 
+                Margin="0,1,7,1" 
+                Width="50"
+                Command="{Binding CancelCommand}"
+                Visibility="{Binding ProgressBar.Visibility}" />
     </Grid>
 </UserControl>
+

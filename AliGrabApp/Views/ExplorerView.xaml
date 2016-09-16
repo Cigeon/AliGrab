@@ -40,7 +40,7 @@
                   SelectionUnit="Cell">
 
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Saved Collections" IsReadOnly="True" Width="*">
+                <DataGridTemplateColumn Header="Collections" IsReadOnly="True" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
@@ -84,29 +84,35 @@
                                 
                                 <Button Command="{Binding DataContext.OpenCollectionCommand, ElementName=dataGrid}"
                                     CommandParameter="{Binding Id}"
-                                    Width="30"
+                                    Width="20"
                                     Height="30"
                                     Margin="5 10"
                                     Background="White"
                                     BorderBrush="White"
-                                    Foreground="#FF505050"
-                                    Content="&#x003E;"
-                                    FontSize="17"
                                     ToolTip="Open"
-                                    Grid.Column="2" />
+                                    Grid.Column="2" >
+                                    <Button.Template>
+                                        <ControlTemplate>
+                                            <Image Source="../Images/open_folder.png"/>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
                                 
                                 <Button Command="{Binding DataContext.DeleteCollectionCommand, ElementName=dataGrid}"
                                     CommandParameter="{Binding Id}"
-                                    Width="30"
+                                    Width="20"
                                     Height="30"
                                     Margin="5 10"
                                     Background="White"
                                     BorderBrush="White"
-                                    Foreground="#FF505050"
-                                    Content="&#x00D7;"
-                                    FontSize="17"
                                     ToolTip="Delete"
-                                    Grid.Column="3" />
+                                    Grid.Column="3" >
+                                    <Button.Template>
+                                        <ControlTemplate>
+                                            <Image Source="../Images/delete_folder.png"/>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
 
                             </Grid>
 

@@ -20,6 +20,7 @@ using OfficeOpenXml.Style;
 namespace AliGrabApp.ViewModels
 {
     public delegate void DbChangedHandler();
+    public delegate void ProgressHandler(ProgressBarModel pb);
 
     public class ResultViewModel : ViewModelBase
     {
@@ -30,20 +31,19 @@ namespace AliGrabApp.ViewModels
         private BackgroundWorker _bw2 = new BackgroundWorker();
 
         public ObservableCollection<AliItem> AliItems { get; set; }
-        public string QueryText { get; set; }
         public ProgressBarModel ProgressBar { get; set; }
-        public StatusBarModel StatusBar { get; set; }
         public ButtonModel Buttons { get; set; }
+        public string CollectionTitle { get; set; }
 
 
-        public static event DbChangedHandler OnDbChanged = delegate { };
+        public static event DbChangedHandler OnDbChanged;
+        public static event ProgressHandler OnProgress;
 
         public ResultViewModel()
         {
             // Init
-            ProgressBar = new ProgressBarModel();
-            StatusBar = new StatusBarModel();
-            Buttons = new ButtonModel();
+            ProgressBar = new ProgressBarModel {Visibility = Visibility.Hidden};
+            Buttons = new ButtonModel {IsEnabled = true};
             AliItems = new ObservableCollection<AliItem>();
             // Commands status
             _canExecute = true;
@@ -59,20 +59,24 @@ namespace AliGrabApp.ViewModels
             _bw2.ProgressChanged += ProgressChanged;
             _bw2.DoWork += DoExport;
             _bw2.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
-            // Change app status
-            StatusBar.Status = "Готов";
-            // Hide progress bar
-            ProgressBar.Visibility = Visibility.Hidden;
-            // Enable buttons
-            Buttons.IsEnabled = true;
             // Subscribe on all items grabbed event
             SearchViewModel.OnItemsGrabbed += ShowResult;
-            // Subscribe on open saved items event
+            // Subscribe events
             ExplorerViewModel.OnItemsOpened += ShowResult;
+            StatusViewModel.OnTaskCanceled += CancelWork;
+            StatusViewModel.OnTaskStarted += () => { Buttons.IsEnabled = false; };
+            StatusViewModel.OnTaskFinished += () => { Buttons.IsEnabled = true; };
         }
 
 
         public void OnWindowClosed(object sender, EventArgs e)
+        {
+            // background worker cancalation
+            _bw1.CancelAsync();
+            _bw2.CancelAsync();
+        }
+
+        private void CancelWork()
         {
             // background worker cancalation
             _bw1.CancelAsync();
@@ -103,7 +107,7 @@ namespace AliGrabApp.ViewModels
         {
             get
             {
-                return _saveDbCommand ?? (_saveDbCommand = new Commands.CommandHandler(() => _bw1.RunWorkerAsync(), _canExecute));
+                return _saveDbCommand ?? (_saveDbCommand = new Commands.CommandHandler(() => Save(), _canExecute));
             }
         }
 
@@ -115,12 +119,36 @@ namespace AliGrabApp.ViewModels
             }
         }
 
+        private void Save()
+        {
+            // Check for empty list
+            if (AliItems.Count == 0)
+            {
+                // Show alert
+                MessageBox.Show("Nothing to save!",
+                                "Info",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information);
+                return;
+            }
+            // Show save dialog
+            var inputDialog = new InputDialog("Please enter the title:", "Collection");
+            var result = inputDialog.ShowDialog();
+            if (result != true) return;
+            CollectionTitle = inputDialog.Answer;
+            _bw1.RunWorkerAsync();
+        }
+
         private void DoSaveDb(object sender, DoWorkEventArgs e)
         {
+            // Show progress bar
+            ProgressBar.Value = 0;
+            ProgressBar.Content = "";
+            ProgressBar.Visibility = Visibility.Visible;
+            // Send current progress to status view
+            OnProgress?.Invoke(ProgressBar);
             // Disable buttons
             Buttons.IsEnabled = false;
-            // Change app status
-            StatusBar.Status = "Сохранение товаров ...";
             // Show progressbar
             ProgressBar.Visibility = Visibility.Visible;
 
@@ -129,7 +157,7 @@ namespace AliGrabApp.ViewModels
                 using (AliContext db = new AliContext())
                 {
                     var group = new AliGroupModel();
-                    group.Name = "Group default name (later change)";
+                    group.Name = CollectionTitle;
                     group.Created = DateTime.Now;
                     group.Items = new ObservableCollection<AliItemModel>();
 
@@ -155,19 +183,18 @@ namespace AliGrabApp.ViewModels
                         // Set progress bar value
                         counter++;
                         int percent = (int)(Convert.ToDouble(counter) / Convert.ToDouble(itemsCount) * 100);
-                        _bw2.ReportProgress(percent, String.Format("{0} из {1}", counter, itemsCount));
+                        _bw1.ReportProgress(percent, String.Format("  Items saving   {0} из {1}", counter, itemsCount));
                     }
                     db.Groups.Add(group);
                     db.SaveChanges();
                 }
 
                 // Fire database changed event to refresh main window
-                OnDbChanged();
+                OnDbChanged?.Invoke();
 
-                // Show message box
                 // Show alert
-                MessageBox.Show("Товары успешно сохранены!",
-                                "Инфо",
+                MessageBox.Show("Items successfully saved!",
+                                "Info",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Information);
             }
@@ -187,45 +214,59 @@ namespace AliGrabApp.ViewModels
 
         private void DoExport(object sender, DoWorkEventArgs e)
         {
+            var exportStoped = false;
+
             // Disable buttons
             Buttons.IsEnabled = false;
+
+            // Check for empty list
+            if (AliItems.Count == 0)
+            {
+                // Show alert
+                MessageBox.Show("Nothing to export!",
+                                "Info",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information);
+                return;
+            }
 
             try
             {
                 // Show save file dialog
-                var fileDialog = new Microsoft.Win32.SaveFileDialog
+                var fileDialog = new SaveFileDialog
                 {
                     AddExtension = true,
                     DefaultExt = ".xlsx",
                     Filter = "Microsoft Excel (*.xlsx)|*.xlsx|All files (*.*)|*.*",
-                    Title = "Экспорт в файл"
+                    Title = "Export to file"
                 };
 
                 var result = fileDialog.ShowDialog();
                 if (result != true) return;
                 var file = new FileStream(fileDialog.FileName, FileMode.Create);
 
-                // Change app status
-                StatusBar.Status = "Экспорт товаров в Excel ...";
-
-                // Show progressbar
+                // Show progress bar
+                ProgressBar.Value = 0;
+                ProgressBar.Content = "";
                 ProgressBar.Visibility = Visibility.Visible;
+                // Send current progress to status view
+                OnProgress?.Invoke(ProgressBar);
 
                 using (var ep = new ExcelPackage(file))
                 {
 
-                    ep.Workbook.Worksheets.Add("Aukro товары");
+                    ep.Workbook.Worksheets.Add("AliExpress items");
                     var ws = ep.Workbook.Worksheets[1];
 
                     // Create header
-                    ws.Cells[1, 1].Value = "Изображение";
-                    ws.Cells[1, 2].Value = "Id товара";
-                    ws.Cells[1, 3].Value = "Название";
-                    ws.Cells[1, 4].Value = "Цена";
-                    ws.Cells[1, 5].Value = "Валюта";
-                    ws.Cells[1, 6].Value = "Продавец";
-                    ws.Cells[1, 7].Value = "Описание";
-                    ws.Cells[1, 8].Value = "Url товара";
+                    ws.Cells[1, 1].Value = "Image";
+                    ws.Cells[1, 2].Value = "Id";
+                    ws.Cells[1, 3].Value = "Title";
+                    ws.Cells[1, 4].Value = "Price";
+                    ws.Cells[1, 5].Value = "PriceCurrency";
+                    ws.Cells[1, 6].Value = "Seller";
+                    ws.Cells[1, 7].Value = "Description";
+                    ws.Cells[1, 8].Value = "Url";
 
                     // Set column width
                     ws.Column(1).Width = 20.0;
@@ -289,7 +330,7 @@ namespace AliGrabApp.ViewModels
                         // Set progress bar value
                         counter++;
                         int percent = (int)(Convert.ToDouble(counter) / Convert.ToDouble(itemsCount) * 100);
-                        _bw2.ReportProgress(percent, String.Format("{0} из {1}", counter, itemsCount));
+                        _bw2.ReportProgress(percent, String.Format("  Items exporting to Excel   {0} из {1}", counter, itemsCount));
 
                         // Check for background worker cancelation
                         if (_bw2.CancellationPending)
@@ -300,11 +341,15 @@ namespace AliGrabApp.ViewModels
                             file.Flush();
                             file.Close();
 
+                            // Set flag
+                            exportStoped = true;
+
                             // Show alert
-                            MessageBox.Show("Экспорт товаров прерван!",
-                                            "Инфо",
+                            MessageBox.Show("Export was canceled!",
+                                            "Info",
                                             MessageBoxButton.OK,
                                             MessageBoxImage.Information);
+
                             return;
                         }
                     }
@@ -317,10 +362,14 @@ namespace AliGrabApp.ViewModels
                 file.Close();
 
                 // Show alert
-                MessageBox.Show("Экспорт товаров успешно выполнен!",
-                                "Инфо",
+                if (!exportStoped)
+                {
+                    MessageBox.Show("Export was successfully finished!",
+                                "Info",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Information);
+                }
+                
             }
             catch (Exception ex)
             {
@@ -339,8 +388,10 @@ namespace AliGrabApp.ViewModels
         private void ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             // Set current progress
-            ProgressBar.Percentage = e.ProgressPercentage;
-            ProgressBar.Progress = e.UserState.ToString();
+            ProgressBar.Value = e.ProgressPercentage;
+            ProgressBar.Content = e.UserState;
+            // Send current progress to status view
+            OnProgress?.Invoke(ProgressBar);
         }
 
         private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -350,12 +401,12 @@ namespace AliGrabApp.ViewModels
 
             }
 
-            // Change app status
-            StatusBar.Status = "Готов";
             // Hide progressbar
-            ProgressBar.Percentage = 0;
-            ProgressBar.Progress = "";
+            ProgressBar.Value = 0;
+            ProgressBar.Content = "Ready";
             ProgressBar.Visibility = Visibility.Hidden;
+            // Send current progress to status view
+            OnProgress?.Invoke(ProgressBar);
             //Enable buttons
             Buttons.IsEnabled = true;
         }

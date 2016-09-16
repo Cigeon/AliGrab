@@ -38,7 +38,7 @@
             </TextBox.InputBindings>
         </TextBox>
 
-        <Button x:Name="ButtonGo" 
+        <Button x:Name="BtnGo" 
                 Content="Go" 
                 HorizontalAlignment="Left" 
                 VerticalAlignment="Stretch"  
@@ -55,6 +55,9 @@
                         <DataTrigger Binding="{Binding Text.Length, ElementName=TextBoxSearch, UpdateSourceTrigger=PropertyChanged}" Value="0">
                             <Setter Property="IsEnabled" Value="False"/>
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding ButtonGo.IsEnabled, UpdateSourceTrigger=PropertyChanged}" Value="False">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </Button.Style>
@@ -62,3 +65,4 @@
 
     </Grid>
 </UserControl>
+

@@ -13,8 +13,8 @@ namespace AliGrabApp.Models
 
     public class ProgressBarModel : INotifyPropertyChanged
     {
-        private int _percentage;
-        private string _progress;
+        private int _percentage; //-----------------------------------------!!!!
+        private string _progress;  //---------------------------------------!!!!
         private Visibility _visibility;
         private double _value;
         private object _content;

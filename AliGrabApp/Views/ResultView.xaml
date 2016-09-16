@@ -155,23 +155,34 @@
         
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1">
             <Button x:Name="ButtonSave" 
-                    Content="Save"
-                    Width="60"
+                    Width="28"
                     HorizontalAlignment="Right"  
-                    Margin="20 0 10 25" 
-                    VerticalAlignment="Bottom" 
+                    Margin="20 1 7 0" 
+                    VerticalAlignment="Top" 
                     Command="{Binding SaveDbCommand}"
                     IsEnabled="{Binding Buttons.IsEnabled}"
-                    ToolTip="Save items to database"/>
+                    ToolTip="Save items to database">
+                <Button.Template>
+                    <ControlTemplate>
+                        <Image Source="../Images/save.png"/>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
             <Button x:Name="ButtonExport" 
                     Content="Export"
-                    Width="60"
+                    Width="30"
                     HorizontalAlignment="Right" 
-                    Margin="10 0 40 25" 
-                    VerticalAlignment="Bottom" 
+                    Margin="7 0 40 25" 
+                    VerticalAlignment="Top" 
                     Command="{Binding ExportCommand}"
                     IsEnabled="{Binding Buttons.IsEnabled}"
-                    ToolTip="Export items to Excel"/>
+                    ToolTip="Export items to Excel">
+                <Button.Template>
+                    <ControlTemplate>
+                        <Image Source="../Images/excel_doc.png"/>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
         </StackPanel>
         <!--<StackPanel Grid.Row="2"/>-->
     </Grid>
