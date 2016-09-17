@@ -201,15 +201,20 @@ namespace AliGrabApp.ViewModels
             catch (EntityException ex)
             {
                 // Show message box
-                MessageBox.Show("Невозможно подключиться к базе данных. \n \n" +
-                                "Проверьте наличие экземпляра базы данных MS SQL Server LocalDB на Вашем компьютере.\n \n" +
+                MessageBox.Show("Unable to connect to database. \n \n" +
+                                "Check the database instance MS SQL Server LocalDB on your computer.\n \n" +
                                 ex.Message,
-                                "Ошибка!",
+                                "Error!",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
             }
-
-
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message,
+                                "Error!",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
+            }
         }
 
         private void DoExport(object sender, DoWorkEventArgs e)
@@ -373,12 +378,12 @@ namespace AliGrabApp.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Невозможно экспортировать данные в файл Excel. \n \n" +
-                                "- Возможно у Вас нет прав для записи данных в выбранный Вами " +
-                                "каталог. Попробуйте сохранить файл в другую директорию." +
-                                "- Возможно данные повреждены. Попробуйте повторить Ваш поисковый запрос." +
+                MessageBox.Show("Imposible to export data to an Excel file. \n \n" +
+                                "- Maybe you don't have permission to write the data in the selected " +
+                                "folder. Try saving the file to a different directory." +
+                                "- Perhaps the data is corrupted. Try to repeat your search request." +
                                 ex.Message,
-                                "Ошибка!",
+                                "Error!",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
             }

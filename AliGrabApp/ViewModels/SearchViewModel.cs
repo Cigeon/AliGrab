@@ -34,7 +34,8 @@ namespace AliGrabApp.ViewModels
         public ProgressBarModel ProgressBar { get; set; }  
         public ControlModel ButtonGo { get; set; }
         public ObservableCollection<AliItem> AliItems { get; set; }             
-        public string QueryText { get; set; }
+        //public string QueryText { get; set; }
+        public string Url { get; set; }
 
         public static event ItemsGrabbedHandler OnItemsGrabbed;
         public static event SearchProgressHandler OnSearchProgress;
@@ -82,9 +83,10 @@ namespace AliGrabApp.ViewModels
             AliItems.Clear();
 
             // Replace space char with plus char
-            var searchText = QueryText.Replace(' ', '+');
+            //var searchText = QueryText.Replace(' ', '+');
             // Initial page url
-            var url = "http://aukro.ua/listing/listing.php?string=" + searchText + "&search_scope=";
+            //var url = "http://aukro.ua/listing/listing.php?string=" + searchText + "&search_scope=";
+            var url = Url;
 
             // Loop throw all pages 
             while (true)
@@ -104,10 +106,13 @@ namespace AliGrabApp.ViewModels
                     // Get items count
                     if (!itemsCountFinded)
                     {
-                        var items = document.QuerySelectorAll("#main-breadcrumb-search-hits").First().Text();
-                        int index = items.IndexOf(" ");
-                        if (index > 0) items = items.Substring(1, index);
+                        var items = document.QuerySelectorAll("strong.search-count").First().Text();
+                        items = items.Replace(",", "");
+                        //var items = document.QuerySelectorAll("#main-breadcrumb-search-hits").First().Text();
+                        //int index = items.IndexOf(" ");
+                        //if (index > 0) items = items.Substring(1, index);
                         itemsCount = int.Parse(items);
+                        Debug.WriteLine(itemsCount);
                         if (itemsCount == 0)
                         {
                             // Set flag items not found
@@ -135,11 +140,11 @@ namespace AliGrabApp.ViewModels
                 }
                 catch (WebException ex)
                 {
-                    MessageBox.Show("Веб-ресурс недоступен. \n \n" +
-                                    "- Проверьте подключение к сети интернет на Вашем компьютере.\n" +
-                                    "- Возможно возникла ошибка сервера, попробуйте повторить поиск.\n \n" +
+                    MessageBox.Show("Web resource is not available. \n \n" +
+                                    "- Check the connection to the Internet on your computer.\n" +
+                                    "- Perhaps there was a server error, please try again.\n \n" +
                                     "Message: " + ex.Message,
-                                    "Ошибка!",
+                                    "Error!",
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Error);
                 }

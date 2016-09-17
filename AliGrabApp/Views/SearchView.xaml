@@ -17,13 +17,13 @@
         </Grid.RowDefinitions>
 
         <Label x:Name="LabelSearch" 
-               Content="Search:" 
+               Content="URL:" 
                HorizontalAlignment="Right" 
                VerticalAlignment="Stretch"  
                Height="26" Grid.Column="0" />
 
         <TextBox x:Name="TextBoxSearch"
-                 Text="{Binding QueryText, UpdateSourceTrigger=PropertyChanged}"
+                 Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}"
                  HorizontalAlignment="Stretch" 
                  VerticalAlignment="Stretch"
                  Height="24" 

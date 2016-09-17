@@ -76,13 +76,13 @@ namespace AliGrabApp.ViewModels
                     using (var db = new AliContext())
                     {
                         var query = from g in db.Groups
-                                    select new
-                                    {
-                                        g.Id,
-                                        g.Name,
-                                        g.Created,
-                                        g.Items
-                                    };
+                            select new
+                            {
+                                g.Id,
+                                g.Name,
+                                g.Created,
+                                g.Items
+                            };
 
                         if (query != null)
                         {
@@ -103,13 +103,20 @@ namespace AliGrabApp.ViewModels
                 }
                 catch (SqlException ex)
                 {
-                    MessageBox.Show("Невозможно подключиться к базе данных. \n \n" +
-                                    "Проверьте наличие экземпляра базы данных MS SQL Server LocalDB на Вашем компьютере.\n \n" +
+                    MessageBox.Show("Unable to connect to database. \n \n" +
+                                    "Check the database instance MS SQL Server LocalDB on your computer.\n \n" +
                                     ex.Message,
-                                    "Ошибка!",
+                                    "Error!",
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Error);
                     LoadingAnimationModel.Visibility = Visibility.Hidden;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message,
+                                    "Error!",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
                 }
 
             }));
@@ -128,22 +135,6 @@ namespace AliGrabApp.ViewModels
             // Hide loading animation
             LoadingAnimationModel.Visibility = Visibility.Hidden;
         }
-
-        // Start search
-        //public ICommand StartSearchCommand
-        //{
-        //    get
-        //    {
-        //        return _startSearchCommand ?? (_startSearchCommand = new Commands.CommandHandler(StartSearch, _canExecute));
-        //    }
-        //}
-
-        //public void StartSearch()
-        //{
-        //    // Creates search window ----------------------------------- !!!!
-        //    var searchWindow = new SearchWindow();
-        //    searchWindow.ShowDialog();
-        //}
 
         // Open saved collection
         public ICommand OpenCollectionCommand
@@ -181,15 +172,11 @@ namespace AliGrabApp.ViewModels
                 }
 
                 OnItemsOpened?.Invoke(aliItems);
-                // Open result window ------------------------------------------------------- !!!!
-                /*var resultWindow = new PreviewWindow();
-                resultWindow.AliItems = aliItems;
-                resultWindow.Show();*/
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message,
-                                "Ошибка!",
+                                "Error!",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
             }
@@ -229,7 +216,7 @@ namespace AliGrabApp.ViewModels
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message,
-                                "Ошибка!",
+                                "Error!",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
             }
