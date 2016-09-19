@@ -108,11 +108,8 @@ namespace AliGrabApp.ViewModels
                     {
                         var items = document.QuerySelectorAll("strong.search-count").First().Text();
                         items = items.Replace(",", "");
-                        //var items = document.QuerySelectorAll("#main-breadcrumb-search-hits").First().Text();
-                        //int index = items.IndexOf(" ");
-                        //if (index > 0) items = items.Substring(1, index);
                         itemsCount = int.Parse(items);
-                        Debug.WriteLine(itemsCount);
+
                         if (itemsCount == 0)
                         {
                             // Set flag items not found
@@ -176,8 +173,8 @@ namespace AliGrabApp.ViewModels
             // Get link to the next page
             try
             {
-                url = "http://aukro.ua";
-                url += document.QuerySelectorAll("div.pager-bottom > ul > li.next > a")
+                url = "http:";
+                url += document.QuerySelectorAll("a.page-next")
                     .First()
                     .GetAttribute("href");
             }
@@ -243,17 +240,16 @@ namespace AliGrabApp.ViewModels
 
         private IEnumerable<string> GetItemsUrls(IHtmlDocument document)
         {
-            // Get all products links on page
-            var prodRawLinks = document.QuerySelectorAll("div.photo > a");
+            var prodRawLinks = document.QuerySelectorAll("div.item > div.img > div.pic > a.picRind");
             foreach (var link in prodRawLinks)
             {
-                yield return "http://aukro.ua" + link.GetAttribute("href");
+                yield return "http:" + link.GetAttribute("href");
             }
         }
 
         private AliItem GetItemFromPage(string page, string url)
         {
-
+            // check for html.gr__login_aliexpress_com
             // Generate structured document
             var parser = new HtmlParser();
             var document = parser.Parse(page);
