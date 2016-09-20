@@ -88,6 +88,7 @@
     </Compile>
     <Compile Include="Models\AliGroupModel.cs" />
     <Compile Include="Models\AliItemModel.cs" />
+    <Compile Include="Models\ProxyServer.cs" />
     <Compile Include="Models\UIElementModel.cs" />
     <Compile Include="ViewModels\ExplorerViewModel.cs" />
     <Compile Include="ViewModels\ResultViewModel.cs" />

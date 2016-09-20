@@ -16,6 +16,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using AliGrabApp.Commands;
 using AngleSharp.Dom.Html;
+using System.IO;
 
 namespace AliGrabApp.ViewModels
 {
@@ -33,9 +34,11 @@ namespace AliGrabApp.ViewModels
 
         public ProgressBarModel ProgressBar { get; set; }  
         public ControlModel ButtonGo { get; set; }
-        public ObservableCollection<AliItem> AliItems { get; set; }             
-        //public string QueryText { get; set; }
+        public ObservableCollection<AliItem> AliItems { get; set; }
+        public ObservableCollection<ProxyServer> ProxyServers { set; get; }
+        public ProxyServer CurrentProxy { get; set; }
         public string Url { get; set; }
+        
 
         public static event ItemsGrabbedHandler OnItemsGrabbed;
         public static event SearchProgressHandler OnSearchProgress;
@@ -46,6 +49,8 @@ namespace AliGrabApp.ViewModels
             ProgressBar = new ProgressBarModel { Visibility = Visibility.Hidden };
             ButtonGo = new ControlModel { IsEnabled = true };
             AliItems = new ObservableCollection<AliItem>();
+            ProxyServers = new ObservableCollection<ProxyServer>();
+            CurrentProxy = new ProxyServer();
             _itemNo = 0;
             // Commands status
             _canExecute = true;
@@ -82,10 +87,10 @@ namespace AliGrabApp.ViewModels
             var itemsCountFinded = false;
             AliItems.Clear();
 
-            // Replace space char with plus char
-            //var searchText = QueryText.Replace(' ', '+');
+            // Get proxy servers list
+            GetProxyServers();
+
             // Initial page url
-            //var url = "http://aukro.ua/listing/listing.php?string=" + searchText + "&search_scope=";
             var url = Url;
 
             // Loop throw all pages 
@@ -96,7 +101,7 @@ namespace AliGrabApp.ViewModels
 
                 try
                 {
-                    // Get page with items
+                    // Get html document with items
                     var page = RetrievePage(url);
 
                     // Generate structured document
@@ -109,7 +114,7 @@ namespace AliGrabApp.ViewModels
                         var items = document.QuerySelectorAll("strong.search-count").First().Text();
                         items = items.Replace(",", "");
                         itemsCount = int.Parse(items);
-
+                        Debug.WriteLine(itemsCount);
                         if (itemsCount == 0)
                         {
                             // Set flag items not found
@@ -121,7 +126,7 @@ namespace AliGrabApp.ViewModels
 
                     // Get url to the next page
                     var nextPageUrl = GetNextPageUrl(document);
-
+                    Debug.WriteLine(nextPageUrl);
                     // Get all items
                     var task = GetItemsFromPage(document, itemsCount);
                     var pageItems = task.Result;
@@ -148,6 +153,26 @@ namespace AliGrabApp.ViewModels
             }
         }
 
+        private void GetProxyServers()
+        {
+            var proxyPage = RetrievePage("http://www.sslproxies.org/");
+            // Generate structured document
+            var proxyParser = new HtmlParser();
+            var proxyDoc = proxyParser.Parse(proxyPage);
+            // Get proxy list
+            var proxyIp = proxyDoc.QuerySelectorAll("table.fpltable > tbody > tr > td:nth-child(1)");
+            var proxyPort = proxyDoc.QuerySelectorAll("table.fpltable > tbody > tr > td:nth-child(2)");
+            for (int i = 0; i < proxyIp.Length; i++)
+            {
+                ProxyServers.Add(new ProxyServer
+                {
+                    Ip = proxyIp[i].TextContent,
+                    Port = proxyPort[i].TextContent
+                });
+            }
+            CurrentProxy = ProxyServers.First();
+        }
+
         private string RetrievePage(string url)
         {
             // Get web page source code
@@ -164,6 +189,67 @@ namespace AliGrabApp.ViewModels
             itemClient.Encoding = Encoding.UTF8;
             var itemPage = await itemClient.DownloadStringTaskAsync(url);
             return itemPage;
+        }
+
+        private IHtmlDocument RetrievePageProxy(string url)
+        {
+            IHtmlDocument document = null;
+            var count = 0;
+            var retries = 20;
+            bool success = false;
+            while(!success && count < retries)
+            {
+                string page = "";
+                Debug.WriteLine(CurrentProxy.Ip);
+                Debug.WriteLine(CurrentProxy.Port);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                WebProxy proxy = new WebProxy(CurrentProxy.Ip, int.Parse(CurrentProxy.Port));
+                proxy.BypassProxyOnLocal = false;
+                request.Proxy = proxy;
+                request.Method = "GET";
+
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    Stream receiveStream = response.GetResponseStream();
+                    StreamReader readStream = null;
+
+                    if (response.CharacterSet == null)
+                    {
+                        readStream = new StreamReader(receiveStream);
+                    }
+                    else
+                    {
+                        readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
+                    }
+
+                    page = readStream.ReadToEnd();
+
+                    response.Close();
+                    readStream.Close();
+                }
+
+                // Generate structured document
+                var parser = new HtmlParser();
+                document = parser.Parse(page);
+                count++;
+
+                // check for aliexpress blocking
+                var items = document.QuerySelectorAll("html.gr__login_aliexpress_com").ToList();
+                if (items?.Count > 0)
+                {
+                    ChangeProxy();
+                    continue;
+                }
+                success = true;                
+            }
+
+            return document;
+        }
+
+        private void ChangeProxy()
+        {
+            
         }
 
         private string GetNextPageUrl(IHtmlDocument document)
@@ -192,7 +278,7 @@ namespace AliGrabApp.ViewModels
         {
             // List of items
             var aliItems = new ObservableCollection<AliItem>();
-
+            
             // Get items urls
             var itemsUrls = GetItemsUrls(document).ToList();
 
@@ -231,7 +317,8 @@ namespace AliGrabApp.ViewModels
 
                 // Set progress bar value
                 int percent = (int)(Convert.ToDouble(_itemNo) / Convert.ToDouble(itemsCount) * 100);
-                _bw.ReportProgress(percent, String.Format("  Items grabbing   {0} of {1}", _itemNo, itemsCount));
+                _bw.ReportProgress(percent, String.Format("Proxy [" + CurrentProxy.Ip + ":" + CurrentProxy.Port + "]"
+                                                            + "  Items grabbing   {0} of {1}", _itemNo, itemsCount));
 
             }
 
@@ -240,9 +327,11 @@ namespace AliGrabApp.ViewModels
 
         private IEnumerable<string> GetItemsUrls(IHtmlDocument document)
         {
-            var prodRawLinks = document.QuerySelectorAll("div.item > div.img > div.pic > a.picRind");
+            //var prodRawLinks = document.QuerySelectorAll("div.item > div.img > div.pic > a.picRind");
+            var prodRawLinks = document.QuerySelectorAll("a.picRind");
             foreach (var link in prodRawLinks)
             {
+                Debug.WriteLine(link.GetAttribute("href"));
                 yield return "http:" + link.GetAttribute("href");
             }
         }
@@ -263,7 +352,7 @@ namespace AliGrabApp.ViewModels
                 .First()
                 .Text();
 
-            if (expire == "завершен")
+            if (expire == "завершен)            
             {
                 return null;
             }
@@ -418,7 +507,7 @@ namespace AliGrabApp.ViewModels
                 _bw.RunWorkerAsync();
                 // Show progress bar
                 ProgressBar.Value = 0;
-                ProgressBar.Content = "";
+                ProgressBar.Content = "Get available proxy servers";
                 ProgressBar.Visibility = Visibility.Visible;
                 // Send current progress to status view
                 OnSearchProgress?.Invoke(ProgressBar);
