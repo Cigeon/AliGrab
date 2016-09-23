@@ -14,11 +14,11 @@ namespace AliGrabApp.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
-        public long AliId { get; set; }
-        public string Title { get; set; }
-        public string Type { get; set; }
-        public double Price { get; set; }
+        public string Title { get; set; }        
+        public string Price { get; set; }
         public string PriceCurrency { get; set; }
+        public string Unit { get; set; }
+        public string Shipping { get; set; }
         public string Seller { get; set; }
         public string Link { get; set; }
         public string Description { get; set; }
@@ -28,11 +28,11 @@ namespace AliGrabApp.Models
     public class AliItem : INotifyPropertyChanged
     {
         private Guid _id;
-        private long _aliId;
         private string _title;
-        private string _type;
-        private double _price;
+        private string _price;
         private string _priceCurrency;
+        private string _unit;
+        private string _shipping;
         private string _seller;
         private string _link;
         private string _description;
@@ -64,19 +64,6 @@ namespace AliGrabApp.Models
             }
         }
 
-        public long AliId
-        {
-            get { return _aliId; }
-            set
-            {
-                if (_aliId != value)
-                {
-                    _aliId = value;
-                    RaisePropertyChanged("AliId");
-                }
-            }
-        }
-
         public string Title
         {
             get { return _title; }
@@ -90,20 +77,7 @@ namespace AliGrabApp.Models
             }
         }
 
-        public string Type
-        {
-            get { return _type; }
-            set
-            {
-                if (_type != value)
-                {
-                    _type = value;
-                    RaisePropertyChanged("Type");
-                }
-            }
-        }
-
-        public double Price
+        public string Price
         {
             get { return _price; }
             set
@@ -125,6 +99,32 @@ namespace AliGrabApp.Models
                 {
                     _priceCurrency = value;
                     RaisePropertyChanged("PriceCurrency");
+                }
+            }
+        }
+
+        public string Unit
+        {
+            get { return _unit; }
+            set
+            {
+                if (_unit != value)
+                {
+                    _unit = value;
+                    RaisePropertyChanged("Unit");
+                }
+            }
+        }
+
+        public string Shipping
+        {
+            get { return _shipping; }
+            set
+            {
+                if (_shipping != value)
+                {
+                    _shipping = value;
+                    RaisePropertyChanged("Shipping");
                 }
             }
         }

@@ -159,11 +159,11 @@ namespace AliGrabApp.ViewModels
                     aliItems.Add(new AliItem
                     {
                         Id = item.Id,
-                        AliId = item.AliId,
                         Title = item.Title,
-                        Type = item.Type,
                         Price = item.Price,
                         PriceCurrency = item.PriceCurrency,
+                        Unit = item.Unit,
+                        Shipping = item.Shipping,
                         Seller = item.Seller,
                         Link = item.Link,
                         Description = item.Description,

@@ -383,13 +383,6 @@ namespace AliGrabApp.ViewModels
             //    return null;
             //}
 
-            //// Id
-            //// Not used
-            //aliItem.AliId = long.Parse(
-            //    document.QuerySelectorAll("p.itemId > span")
-            //    .First()
-            //    .Text());
-
             // Title
             aliItem.Title = document.QuerySelectorAll("div.detail-wrap > h1.product-name")
                 .First()
@@ -397,16 +390,12 @@ namespace AliGrabApp.ViewModels
 
             Debug.WriteLine("-- Title: " + aliItem.Title);
 
-            //// Selling type
-            //aliItem.Type = document.QuerySelectorAll("input.show-item-btn")
-            //    .First()
-            //    .GetAttribute("value");
-            //// Price
-            //aliItem.Price = double.Parse(
-            //    document.QuerySelectorAll("span.p-price")
-            //        .First()
-            //        .Text(),
-            //    System.Globalization.CultureInfo.InvariantCulture);
+            // Price
+            aliItem.Price = document.QuerySelectorAll("div.p-price-content > span.p-price")
+                    .First()
+                    .Text();
+
+            Debug.WriteLine("-- Price: " + aliItem.Price);
 
             // Price currency
             aliItem.PriceCurrency = document.QuerySelectorAll("span.p-symbol")
@@ -415,57 +404,54 @@ namespace AliGrabApp.ViewModels
 
             Debug.WriteLine("-- Currency: " + aliItem.PriceCurrency);
 
-            //// Seller
-            //aliItem.Seller = document.QuerySelectorAll("div.sellerDetails > dl > dt")
-            //    .First()
-            //    .Text()
-            //    .Replace("Продaвец ", "")
-            //    .Trim();
-            //aliItem.Seller = aliItem.Seller.Remove(
-            //    aliItem.Seller.IndexOf(" "),
-            //    aliItem.Seller.Length - aliItem.Seller.IndexOf(" "));
+            // Unit
+            aliItem.Unit = document.QuerySelectorAll("div.quantity-info-main > span.p-unit")
+                .First()
+                .Text();
+
+            Debug.WriteLine("-- Unit: " + aliItem.Unit);
+
+            // Shipping
+            var shippingWords = document.QuerySelectorAll("dd.p-item-main > div.p-logistics-detail > span");
+            foreach (var item in shippingWords)
+            {
+                aliItem.Shipping += item.Text();
+            }
+            shippingWords = document.QuerySelectorAll("dd.p-item-main > div.p-logistics-detail > a.shipping-link > span");
+            foreach (var item in shippingWords)
+            {
+                aliItem.Shipping += item.Text();
+            }
+
+            Debug.WriteLine("-- Shipping: " + aliItem.Shipping);
+
+            // Seller
+            aliItem.Seller = document.QuerySelectorAll("dl.store-intro > dd.store-name > a.store-lnk")
+                .First()
+                .Text();
+
+            Debug.WriteLine("-- Seller: " + aliItem.Seller);
 
             // Link
             aliItem.Link = url;
 
-            //// Description
-            //aliItem.Description = document.QuerySelectorAll("div.deliveryAndPayment > table")
-            //    .Last()
-            //    .Text()
-            //    .Trim();
-            //// remove empty lines
-            //aliItem.Description = Regex.Replace(
-            //    aliItem.Description,
-            //    @"^\s+$[\r\n]*",
-            //    "",
-            //    RegexOptions.Multiline);
-            //// remove spaces from each lines
-            //aliItem.Description = string.Join(
-            //    "\n",
-            //    aliItem.Description.Split('\n').Select(s => s.Trim()));
-
+            // Description
+            aliItem.Description = document.QuerySelectorAll("ul.product-property-list")
+                .Last()
+                .Text();
+            // remove empty lines
+            aliItem.Description = Regex.Replace(
+                aliItem.Description,
+                @"^\s+$[\r\n]*",
+                "",
+                RegexOptions.Multiline);
 
             // Image
             // get image link
-            var imgUrl = "http:";
-            try
-            {
-                imgUrl = document.QuerySelectorAll("a.ui-image-viewer-thumb-frame > img")
+            var imgUrl = document.QuerySelectorAll("a.ui-image-viewer-thumb-frame > img")
                 .First()
-                .GetAttribute("src");                
-            }
-            catch (InvalidOperationException)
-            {
-                MessageBox.Show("No image found");
-                //// if no image parse another element
-                //imgUrl = document.QuerySelectorAll("div.img")
-                //        .First()
-                //        .GetAttribute("style");
-                //// cut reference from string
-                //imgUrl = String.Join("", Regex.Matches(imgUrl, @"\'(.+?)\'")
-                //         .Cast<Match>()
-                //         .Select(m => m.Groups[1].Value));
-            }
+                .GetAttribute("src");
+
             // load image
             try
             {
