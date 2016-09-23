@@ -114,7 +114,7 @@ namespace AliGrabApp.ViewModels
                         var items = document.QuerySelectorAll("strong.search-count").First().Text();
                         items = items.Replace(",", "");
                         itemsCount = int.Parse(items);
-                        Debug.WriteLine(itemsCount);
+
                         if (itemsCount == 0)
                         {
                             // Set flag items not found
@@ -122,11 +122,17 @@ namespace AliGrabApp.ViewModels
                             break;
                         }
                         itemsCountFinded = true;
+
+                        Debug.WriteLine("Items count: " + itemsCount);
                     }
+
+                    Debug.WriteLine("Current items list url: " + url);
 
                     // Get url to the next page
                     var nextPageUrl = GetNextPageUrl(document);
-                    Debug.WriteLine(nextPageUrl);
+
+                    Debug.WriteLine("Next items list url: " + nextPageUrl);
+
                     // Get all items
                     var task = GetItemsFromPage(document, itemsCount);
                     var pageItems = task.Result;
@@ -227,6 +233,7 @@ namespace AliGrabApp.ViewModels
 
                     response.Close();
                     readStream.Close();
+                    success = true;
                 }
 
                 // Generate structured document
@@ -239,9 +246,9 @@ namespace AliGrabApp.ViewModels
                 if (items?.Count > 0)
                 {
                     ChangeProxy();
-                    continue;
+                    success = false;
                 }
-                success = true;                
+                              
             }
 
             return document;
@@ -249,7 +256,11 @@ namespace AliGrabApp.ViewModels
 
         private void ChangeProxy()
         {
-            
+            int index = ProxyServers.IndexOf(CurrentProxy);
+            if (index < ProxyServers.Count - 1)
+                CurrentProxy = ProxyServers.ElementAt(index + 1);
+            else
+                GetProxyServers();
         }
 
         private string GetNextPageUrl(IHtmlDocument document)
@@ -281,6 +292,9 @@ namespace AliGrabApp.ViewModels
             
             // Get items urls
             var itemsUrls = GetItemsUrls(document).ToList();
+
+            Debug.WriteLine("Items count at list: " + itemsUrls.Count);
+            foreach (var i in itemsUrls) { Debug.WriteLine(i); }
 
             // Get items pages
             var RetrievePagesTask = new List<Task<string>>();
@@ -327,17 +341,29 @@ namespace AliGrabApp.ViewModels
 
         private IEnumerable<string> GetItemsUrls(IHtmlDocument document)
         {
-            //var prodRawLinks = document.QuerySelectorAll("div.item > div.img > div.pic > a.picRind");
-            var prodRawLinks = document.QuerySelectorAll("a.picRind");
-            foreach (var link in prodRawLinks)
+            var querySelector = "";
+            // Check view type (list or gallery)
+            var type = document.QuerySelectorAll("#view-list").First().GetAttribute("href");
+            if (type == "javascript:void(0);")
             {
-                Debug.WriteLine(link.GetAttribute("href"));
+                querySelector = "li.list-item > div > div > div.detail > h3 > a";
+            }
+            else
+            {
+                querySelector = "div.lazy-load > ul > li > div.item > div.img > div.pic > a.picRind";
+            }
+
+            //var prodRawLinks = document.QuerySelectorAll("div.item > div.img > div.pic > a.picRind");
+            var prodRawLinks = document.QuerySelectorAll(querySelector);
+            foreach (var link in prodRawLinks)
+            {                
                 yield return "http:" + link.GetAttribute("href");
             }
         }
 
         private AliItem GetItemFromPage(string page, string url)
         {
+            Debug.WriteLine("Item url: " + url);
             // check for html.gr__login_aliexpress_com
             // Generate structured document
             var parser = new HtmlParser();
@@ -346,90 +372,106 @@ namespace AliGrabApp.ViewModels
             // Greate aukro item for storing data
             var aliItem = new AliItem();
 
-            // Get all data
-            // check for expired item
-            var expire = document.QuerySelectorAll("#timeLeftCounter")
+            //// Get all data
+            //// check for expired item
+            //var expire = document.QuerySelectorAll("#timeLeftCounter")
+            //    .First()
+            //    .Text();
+
+            //if (expire == "завершен")            
+            //{
+            //    return null;
+            //}
+
+            //// Id
+            //// Not used
+            //aliItem.AliId = long.Parse(
+            //    document.QuerySelectorAll("p.itemId > span")
+            //    .First()
+            //    .Text());
+
+            // Title
+            aliItem.Title = document.QuerySelectorAll("div.detail-wrap > h1.product-name")
                 .First()
                 .Text();
 
-            if (expire == "завершен)            
-            {
-                return null;
-            }
+            Debug.WriteLine("-- Title: " + aliItem.Title);
 
-            // Id
-            aliItem.AliId = long.Parse(
-                document.QuerySelectorAll("p.itemId > span")
-                .First()
-                .Text());
-            // Title
-            aliItem.Title = document.QuerySelectorAll("#siSocialLinks")
-                .First()
-                .GetAttribute("data-item-name");
-            // Selling type
-            aliItem.Type = document.QuerySelectorAll("input.show-item-btn")
-                .First()
-                .GetAttribute("value");
-            // Price
-            aliItem.Price = double.Parse(
-                document.QuerySelectorAll("[itemprop='price']")
-                    .First()
-                    .GetAttribute("content"),
-                System.Globalization.CultureInfo.InvariantCulture);
+            //// Selling type
+            //aliItem.Type = document.QuerySelectorAll("input.show-item-btn")
+            //    .First()
+            //    .GetAttribute("value");
+            //// Price
+            //aliItem.Price = double.Parse(
+            //    document.QuerySelectorAll("span.p-price")
+            //        .First()
+            //        .Text(),
+            //    System.Globalization.CultureInfo.InvariantCulture);
+
             // Price currency
-            aliItem.PriceCurrency = document.QuerySelectorAll("[itemprop='priceCurrency']")
+            aliItem.PriceCurrency = document.QuerySelectorAll("span.p-symbol")
                 .First()
-                .GetAttribute("content");
-            // Seller
-            aliItem.Seller = document.QuerySelectorAll("div.sellerDetails > dl > dt")
-                .First()
-                .Text()
-                .Replace("Продaвец ", "")
-                .Trim();
-            aliItem.Seller = aliItem.Seller.Remove(
-                aliItem.Seller.IndexOf(" "),
-                aliItem.Seller.Length - aliItem.Seller.IndexOf(" "));
+                .Text();
+
+            Debug.WriteLine("-- Currency: " + aliItem.PriceCurrency);
+
+            //// Seller
+            //aliItem.Seller = document.QuerySelectorAll("div.sellerDetails > dl > dt")
+            //    .First()
+            //    .Text()
+            //    .Replace("Продaвец ", "")
+            //    .Trim();
+            //aliItem.Seller = aliItem.Seller.Remove(
+            //    aliItem.Seller.IndexOf(" "),
+            //    aliItem.Seller.Length - aliItem.Seller.IndexOf(" "));
+
             // Link
             aliItem.Link = url;
-            // Description
-            aliItem.Description = document.QuerySelectorAll("div.deliveryAndPayment > table")
-                .Last()
-                .Text()
-                .Trim();
-            // remove empty lines
-            aliItem.Description = Regex.Replace(
-                aliItem.Description,
-                @"^\s+$[\r\n]*",
-                "",
-                RegexOptions.Multiline);
-            // remove spaces from each lines
-            aliItem.Description = string.Join(
-                "\n",
-                aliItem.Description.Split('\n').Select(s => s.Trim()));
+
+            //// Description
+            //aliItem.Description = document.QuerySelectorAll("div.deliveryAndPayment > table")
+            //    .Last()
+            //    .Text()
+            //    .Trim();
+            //// remove empty lines
+            //aliItem.Description = Regex.Replace(
+            //    aliItem.Description,
+            //    @"^\s+$[\r\n]*",
+            //    "",
+            //    RegexOptions.Multiline);
+            //// remove spaces from each lines
+            //aliItem.Description = string.Join(
+            //    "\n",
+            //    aliItem.Description.Split('\n').Select(s => s.Trim()));
+
+
             // Image
             // get image link
-            var imgUrl = "";
+            var imgUrl = "http:";
             try
             {
-                imgUrl = document.QuerySelectorAll("[itemprop='image']")
+                imgUrl = document.QuerySelectorAll("a.ui-image-viewer-thumb-frame > img")
                 .First()
-                .GetAttribute("content");
+                .GetAttribute("src");                
             }
             catch (InvalidOperationException)
             {
-                // if no image parse another element
-                imgUrl = document.QuerySelectorAll("div.img")
-                        .First()
-                        .GetAttribute("style");
-                // cut reference from string
-                imgUrl = String.Join("", Regex.Matches(imgUrl, @"\'(.+?)\'")
-                         .Cast<Match>()
-                         .Select(m => m.Groups[1].Value));
+                MessageBox.Show("No image found");
+                //// if no image parse another element
+                //imgUrl = document.QuerySelectorAll("div.img")
+                //        .First()
+                //        .GetAttribute("style");
+                //// cut reference from string
+                //imgUrl = String.Join("", Regex.Matches(imgUrl, @"\'(.+?)\'")
+                //         .Cast<Match>()
+                //         .Select(m => m.Groups[1].Value));
             }
             // load image
             try
             {
-                aliItem.Image = new WebClient().DownloadData(imgUrl);                  // async
+                aliItem.Image = new WebClient().DownloadData(imgUrl);
+
+                Debug.WriteLine("-- Image size: " + aliItem.Image.Length + " bytes");
             }
             catch (WebException)
             {

@@ -25,7 +25,7 @@
                    Text="{Binding ProgressBar.Content, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Center"
-                   Margin="7,3,0,3"
+                   Margin="12,3,0,3"
                    Grid.Row="0"
                    Grid.ZIndex ="2"/>
         <Button x:Name="BtnCancel" 
