@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AliGrabApp"
         xmlns:views="clr-namespace:AliGrabApp.Views"
         mc:Ignorable="d"
-        Title="AliGrab" 
+        Title="AliGrabber" 
         Height="600" 
         Width="800" 
         MinHeight="600"
@@ -19,7 +19,7 @@
             <ColumnDefinition Width="139*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="70"/>
             <RowDefinition Height="424*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>

@@ -18,8 +18,8 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <DataGrid x:Name="dataGrid"
@@ -33,8 +33,7 @@
                   ScrollViewer.VerticalScrollBarVisibility="Visible"
                   SelectionMode="Extended"
                   SelectionUnit="Cell"
-                  Grid.Row="0"
-                  Grid.RowSpan="2"
+                  Grid.Row="1"
                   Margin="2,0,7,0">
             <DataGrid.Resources>
                 <system:String x:Key="GoToSite">Open in browser</system:String>
@@ -57,11 +56,15 @@
                         <DataTemplate>
                             <TextBox IsReadOnly="True" 
                                      Text="{Binding Title, Mode=OneWay}"
+                                     Width="360"
                                      Background="Transparent"
                                      BorderThickness="0"
-                                     Margin="20"
+                                     Margin="10"
                                      HorizontalAlignment="Left"
-                                     VerticalAlignment="Center"/>
+                                     VerticalAlignment="Center"
+                                     ScrollViewer.CanContentScroll="True"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -73,7 +76,7 @@
                                      Text="{Binding Price, Mode=OneWay}"
                                      Background="Transparent"
                                      BorderThickness="0"
-                                     Margin="20"
+                                     Margin="10"
                                      HorizontalAlignment="Center"
                                      VerticalAlignment="Center"/>
                         </DataTemplate>
@@ -87,7 +90,7 @@
                                      Text="{Binding PriceCurrency, Mode=OneWay}"
                                      Background="Transparent"
                                      BorderThickness="0"
-                                     Margin="20"
+                                     Margin="10"
                                      HorizontalAlignment="Center"
                                      VerticalAlignment="Center"/>
                         </DataTemplate>
@@ -101,22 +104,8 @@
                                      Text="{Binding Unit, Mode=OneWay}"
                                      Background="Transparent"
                                      BorderThickness="0"
-                                     Margin="20"
+                                     Margin="10"
                                      HorizontalAlignment="Center"
-                                     VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Header="Shipping" IsReadOnly="True">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBox IsReadOnly="True" 
-                                     Text="{Binding Shipping, Mode=OneWay}"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     Margin="20"
-                                     HorizontalAlignment="Left"
                                      VerticalAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -127,21 +116,25 @@
                         <DataTemplate>
                             <TextBox IsReadOnly="True" 
                                      Text="{Binding Seller, Mode=OneWay}"
+                                     Width="100"
                                      Background="Transparent"
                                      BorderThickness="0"
-                                     Margin="20"
+                                     Margin="10"
                                      HorizontalAlignment="Center"
-                                     VerticalAlignment="Center"/>
+                                     VerticalAlignment="Center"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="Description" IsReadOnly="True" Width="300">
+                <DataGridTemplateColumn Header="Description" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <ScrollViewer Margin="10">
                                 <TextBox IsReadOnly="True" 
                                      Text="{Binding Description, Mode=OneWay}"
+                                     Width="260"
                                      Background="Transparent"
                                      BorderThickness="0"
                                      HorizontalAlignment="Left"
@@ -166,12 +159,12 @@
 
             </DataGrid.Columns>
         </DataGrid>
-        
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1">
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="0">
             <Button x:Name="ButtonSave" 
-                    Width="28"
+                    Width="18"
                     HorizontalAlignment="Right"  
-                    Margin="20 1 7 0" 
+                    Margin="20 6 7 5" 
                     VerticalAlignment="Top" 
                     Command="{Binding SaveDbCommand}"
                     IsEnabled="{Binding Buttons.IsEnabled}"
@@ -184,9 +177,9 @@
             </Button>
             <Button x:Name="ButtonExport" 
                     Content="Export"
-                    Width="30"
+                    Width="20"
                     HorizontalAlignment="Right" 
-                    Margin="7 0 40 25" 
+                    Margin="2 5 25 5" 
                     VerticalAlignment="Top" 
                     Command="{Binding ExportCommand}"
                     IsEnabled="{Binding Buttons.IsEnabled}"
@@ -198,6 +191,5 @@
                 </Button.Template>
             </Button>
         </StackPanel>
-        <!--<StackPanel Grid.Row="2"/>-->
     </Grid>
 </UserControl>

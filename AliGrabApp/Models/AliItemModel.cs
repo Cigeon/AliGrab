@@ -18,7 +18,6 @@ namespace AliGrabApp.Models
         public string Price { get; set; }
         public string PriceCurrency { get; set; }
         public string Unit { get; set; }
-        public string Shipping { get; set; }
         public string Seller { get; set; }
         public string Link { get; set; }
         public string Description { get; set; }
@@ -32,7 +31,6 @@ namespace AliGrabApp.Models
         private string _price;
         private string _priceCurrency;
         private string _unit;
-        private string _shipping;
         private string _seller;
         private string _link;
         private string _description;
@@ -112,19 +110,6 @@ namespace AliGrabApp.Models
                 {
                     _unit = value;
                     RaisePropertyChanged("Unit");
-                }
-            }
-        }
-
-        public string Shipping
-        {
-            get { return _shipping; }
-            set
-            {
-                if (_shipping != value)
-                {
-                    _shipping = value;
-                    RaisePropertyChanged("Shipping");
                 }
             }
         }

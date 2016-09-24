@@ -95,7 +95,6 @@ namespace AliGrabApp.ViewModels
                     Price = item.Price,
                     PriceCurrency = item.PriceCurrency,
                     Unit = item.Unit,
-                    Shipping = item.Shipping,
                     Seller = item.Seller,
                     Description = item.Description,
                     Link = item.Link
@@ -172,7 +171,6 @@ namespace AliGrabApp.ViewModels
                             Price = item.Price,
                             PriceCurrency = item.PriceCurrency,
                             Unit = item.Unit,
-                            Shipping = item.Shipping,
                             Seller = item.Seller,
                             Link = item.Link,
                             Description = item.Description,
@@ -183,7 +181,7 @@ namespace AliGrabApp.ViewModels
                         // Set progress bar value
                         counter++;
                         int percent = (int)(Convert.ToDouble(counter) / Convert.ToDouble(itemsCount) * 100);
-                        _bw1.ReportProgress(percent, String.Format("  Items saving   {0} из {1}", counter, itemsCount));
+                        _bw1.ReportProgress(percent, String.Format("Items saving {0} of {1}", counter, itemsCount));
                     }
                     db.Groups.Add(group);
                     db.SaveChanges();
@@ -327,7 +325,6 @@ namespace AliGrabApp.ViewModels
                         ws.Cells[rowNo, 3].Value = item.Price;
                         ws.Cells[rowNo, 4].Value = item.PriceCurrency;
                         ws.Cells[rowNo, 5].Value = item.Unit;
-                        ws.Cells[rowNo, 6].Value = item.Shipping;
                         ws.Cells[rowNo, 7].Value = item.Seller;
                         ws.Cells[rowNo, 8].Value = item.Description;
                         ws.Cells[rowNo, 9].Value = item.Link;
@@ -336,7 +333,7 @@ namespace AliGrabApp.ViewModels
                         // Set progress bar value
                         counter++;
                         int percent = (int)(Convert.ToDouble(counter) / Convert.ToDouble(itemsCount) * 100);
-                        _bw2.ReportProgress(percent, String.Format("  Items exporting to Excel {0} of {1}", counter, itemsCount));
+                        _bw2.ReportProgress(percent, String.Format("Items exporting to Excel {0} of {1}", counter, itemsCount));
 
                         // Check for background worker cancelation
                         if (_bw2.CancellationPending)

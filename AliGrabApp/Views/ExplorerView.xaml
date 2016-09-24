@@ -20,6 +20,7 @@
     <Grid Background="WhiteSmoke">
 
         <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -37,7 +38,8 @@
                   ScrollViewer.CanContentScroll="True" 
                   ScrollViewer.VerticalScrollBarVisibility="Visible"
                   SelectionMode="Extended"
-                  SelectionUnit="Cell">
+                  SelectionUnit="Cell"
+                  Grid.Row="1">
 
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Collections" IsReadOnly="True" Width="*">
@@ -126,6 +128,7 @@
         <control:LoadingAnimation x:Name="ControlLoading" 
                                   HorizontalAlignment="Center" 
                                   VerticalAlignment="Center" 
-                                  Visibility="{Binding LoadingAnimationModel.Visibility}" Height="88" Width="88"/>
+                                  Visibility="{Binding LoadingAnimationModel.Visibility}" Height="88" Width="88"
+                                  Grid.Row="1"/>
     </Grid>
 </UserControl>

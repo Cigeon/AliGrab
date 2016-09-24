@@ -163,7 +163,6 @@ namespace AliGrabApp.ViewModels
                         Price = item.Price,
                         PriceCurrency = item.PriceCurrency,
                         Unit = item.Unit,
-                        Shipping = item.Shipping,
                         Seller = item.Seller,
                         Link = item.Link,
                         Description = item.Description,

@@ -30,6 +30,7 @@ namespace AliGrabApp.ViewModels
         private ICommand _searchCommand;
         private BackgroundWorker _bw = new BackgroundWorker();
         private int _itemNo;
+        private int _currItemNo;
         private bool _itemsNotFound = false;
 
         public ProgressBarModel ProgressBar { get; set; }  
@@ -38,6 +39,7 @@ namespace AliGrabApp.ViewModels
         public ObservableCollection<ProxyServer> ProxyServers { set; get; }
         public ProxyServer CurrentProxy { get; set; }
         public string Url { get; set; }
+        public List<string> BrokenUrls { get; set; }
         
 
         public static event ItemsGrabbedHandler OnItemsGrabbed;
@@ -51,7 +53,9 @@ namespace AliGrabApp.ViewModels
             AliItems = new ObservableCollection<AliItem>();
             ProxyServers = new ObservableCollection<ProxyServer>();
             CurrentProxy = new ProxyServer();
+            BrokenUrls = new List<string>();
             _itemNo = 0;
+            _currItemNo = 0;
             // Commands status
             _canExecute = true;
             // Background worker settings
@@ -88,7 +92,7 @@ namespace AliGrabApp.ViewModels
             AliItems.Clear();
 
             // Get proxy servers list
-            GetProxyServers();
+            //GetProxyServers();
 
             // Initial page url
             var url = Url;
@@ -134,9 +138,42 @@ namespace AliGrabApp.ViewModels
                     Debug.WriteLine("Next items list url: " + nextPageUrl);
 
                     // Get all items
+                    var tmpItems = new ObservableCollection<AliItem>();
                     var task = GetItemsFromPage(document, itemsCount);
-                    var pageItems = task.Result;
+                    var pageItems = task.Result;                    
                     foreach (var item in pageItems)
+                    {
+                        tmpItems.Add(item);
+                    }
+
+                    //var tries = 0;
+                    //var maxTries = 3;
+                    //while (true)
+                    //{
+                    //    try
+                    //    {
+                    //        var task = GetItemsFromPage(document, itemsCount);
+                    //        var pageItems = task.Result;
+                    //        foreach (var item in pageItems)
+                    //        {
+                    //            AliItems.Add(item);
+                    //        }
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        Debug.WriteLine("Repeat web request to " + url);
+                    //        if (tries >= maxTries)
+                    //        {
+                    //            Debug.WriteLine("Broken url: " + url);
+                    //            BrokenUrls.Add(url);
+                    //            break;                                
+                    //        }
+                    //        tries++;
+                    //    }
+                    //}                    
+
+                    // Copy grabbed items to collection
+                    foreach (var item in tmpItems)
                     {
                         AliItems.Add(item);
                     }
@@ -145,6 +182,8 @@ namespace AliGrabApp.ViewModels
                     if (nextPageUrl.Equals("")) break;
                     // Set url for the next iteration
                     url = nextPageUrl;
+
+                    
                 }
                 catch (WebException ex)
                 {
@@ -154,7 +193,13 @@ namespace AliGrabApp.ViewModels
                                     "Message: " + ex.Message,
                                     "Error!",
                                     MessageBoxButton.OK,
-                                    MessageBoxImage.Error);
+                                    MessageBoxImage.Error);                    
+                }
+                catch (AggregateException ex)
+                {
+                    Debug.WriteLine("Repeat web request to ");
+                    // Not calculate unadded items
+                    _itemNo -= _currItemNo + 2;
                 }
             }
         }
@@ -195,6 +240,34 @@ namespace AliGrabApp.ViewModels
             itemClient.Encoding = Encoding.UTF8;
             var itemPage = await itemClient.DownloadStringTaskAsync(url);
             return itemPage;
+
+            //var itemPage = "";
+            //var tries = 0;
+            //var maxTries = 3;
+            //while (true)
+            //{
+            //    try
+            //    {
+            //        // Get web page source code
+            //        var itemClient = new WebClient();
+            //        itemClient.Encoding = Encoding.UTF8;
+            //        itemPage = await itemClient.DownloadStringTaskAsync(url);
+            //        break;
+            //    }
+            //    catch (AggregateException ex)
+            //    {
+            //        Debug.WriteLine("Repeat web request to " + url);
+            //        if (tries >= maxTries)
+            //        {
+            //            Debug.WriteLine("Broken url: " + url);
+            //            BrokenUrls.Add(url);
+            //            break;
+            //        }
+            //        tries++;
+            //    }
+            //}
+
+            //return itemPage;
         }
 
         private IHtmlDocument RetrievePageProxy(string url)
@@ -203,8 +276,13 @@ namespace AliGrabApp.ViewModels
             var count = 0;
             var retries = 20;
             bool success = false;
-            while(!success && count < retries)
+            while (!success)
             {
+                if (count >= retries)
+                {
+                    MessageBox.Show("All proxy servers was used! Try again later.");
+                    break;
+                }
                 string page = "";
                 Debug.WriteLine(CurrentProxy.Ip);
                 Debug.WriteLine(CurrentProxy.Port);
@@ -305,7 +383,7 @@ namespace AliGrabApp.ViewModels
             }
 
             // Get items
-            var item = 0;
+            _currItemNo = 0;
             foreach (var task in RetrievePagesTask)
             {
                 // Check for background worker cancelation
@@ -315,24 +393,25 @@ namespace AliGrabApp.ViewModels
                 var itemPage = await task;
 
                 // Get item from the page
-                var aliItem = GetItemFromPage(itemPage, itemsUrls[item]);
+                var aliItem = GetItemFromPage(itemPage, itemsUrls[_currItemNo]);
 
                 // Check if item exist
                 if (aliItem != null)
                 {
                     aliItems.Add(aliItem);
-                    item++;
+                    _currItemNo++;
                     _itemNo++;
                 }
                 else
                 {
-                    itemsCount--;
+                    //itemsCount--;
                 }
 
                 // Set progress bar value
                 int percent = (int)(Convert.ToDouble(_itemNo) / Convert.ToDouble(itemsCount) * 100);
-                _bw.ReportProgress(percent, String.Format("Proxy [" + CurrentProxy.Ip + ":" + CurrentProxy.Port + "]"
-                                                            + "  Items grabbing   {0} of {1}", _itemNo, itemsCount));
+                _bw.ReportProgress(percent, String.Format("Items grabbing {0} of {1}", _itemNo, itemsCount));
+                //_bw.ReportProgress(percent, String.Format("Proxy [" + CurrentProxy.Ip + ":" + CurrentProxy.Port + "]"
+                //                                            + "  Items grabbing   {0} of {1}", _itemNo, itemsCount));
 
             }
 
@@ -411,20 +490,6 @@ namespace AliGrabApp.ViewModels
 
             Debug.WriteLine("-- Unit: " + aliItem.Unit);
 
-            // Shipping
-            var shippingWords = document.QuerySelectorAll("dd.p-item-main > div.p-logistics-detail > span");
-            foreach (var item in shippingWords)
-            {
-                aliItem.Shipping += item.Text();
-            }
-            shippingWords = document.QuerySelectorAll("dd.p-item-main > div.p-logistics-detail > a.shipping-link > span");
-            foreach (var item in shippingWords)
-            {
-                aliItem.Shipping += item.Text();
-            }
-
-            Debug.WriteLine("-- Shipping: " + aliItem.Shipping);
-
             // Seller
             aliItem.Seller = document.QuerySelectorAll("dl.store-intro > dd.store-name > a.store-lnk")
                 .First()
@@ -491,8 +556,23 @@ namespace AliGrabApp.ViewModels
 
             if (!e.Cancelled)
             {
+                var message = "";
+                if (BrokenUrls.Count > 0)
+                {
+                    message = "Not all items was copied! \n";
+                    message += "Broken links: \n";
+                    foreach (var item in BrokenUrls)
+                    {
+                        message += item + "\n";
+                    }
+
+                }
+                else
+                {
+                    message = "Items was successfully copied! \n";
+                }
                 // Show alert
-                MessageBox.Show("Items successfully copied!", 
+                MessageBox.Show(message, 
                                 "Info", 
                                 MessageBoxButton.OK, 
                                 MessageBoxImage.Information);
@@ -508,7 +588,8 @@ namespace AliGrabApp.ViewModels
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Information);
             }
-
+            // Clear broken urls list
+            BrokenUrls.Clear();
             // clear and hide progress bar
             ProgressBar.Content = "Ready";
             ProgressBar.Visibility = Visibility.Hidden;
@@ -535,7 +616,7 @@ namespace AliGrabApp.ViewModels
                 _bw.RunWorkerAsync();
                 // Show progress bar
                 ProgressBar.Value = 0;
-                ProgressBar.Content = "Get available proxy servers";
+                ProgressBar.Content = "";
                 ProgressBar.Visibility = Visibility.Visible;
                 // Send current progress to status view
                 OnSearchProgress?.Invoke(ProgressBar);
