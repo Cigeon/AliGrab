@@ -87,9 +87,10 @@ namespace AliGrabApp.ViewModels
         {
             AliItems.Clear();
             foreach (var item in items)
-            {
+            {                
                 AliItems.Add(new AliItem
                 {
+                    No = item.No,
                     Image = item.Image,
                     Title = item.Title,
                     Price = item.Price,
@@ -181,7 +182,7 @@ namespace AliGrabApp.ViewModels
                         // Set progress bar value
                         counter++;
                         int percent = (int)(Convert.ToDouble(counter) / Convert.ToDouble(itemsCount) * 100);
-                        _bw1.ReportProgress(percent, String.Format("Items saving {0} of {1}", counter, itemsCount));
+                        _bw1.ReportProgress(percent, String.Format("Saving item(s) {0} of {1}", counter, itemsCount));
                     }
                     db.Groups.Add(group);
                     db.SaveChanges();
@@ -262,31 +263,35 @@ namespace AliGrabApp.ViewModels
                     var ws = ep.Workbook.Worksheets[1];
 
                     // Create header
-                    ws.Cells[1, 1].Value = "Image";
-                    ws.Cells[1, 2].Value = "Id";
+                    ws.Cells[1, 2].Value = "Image";
+                    ws.Cells[1, 1].Value = "No";
                     ws.Cells[1, 3].Value = "Title";
                     ws.Cells[1, 4].Value = "Price";
-                    ws.Cells[1, 5].Value = "PriceCurrency";
-                    ws.Cells[1, 6].Value = "Seller";
-                    ws.Cells[1, 7].Value = "Description";
-                    ws.Cells[1, 8].Value = "Url";
+                    ws.Cells[1, 5].Value = "Currency";
+                    ws.Cells[1, 6].Value = "Unit";
+                    ws.Cells[1, 7].Value = "Seller";
+                    ws.Cells[1, 8].Value = "Description";
+                    ws.Cells[1, 9].Value = "Url";
 
                     // Set column width
-                    ws.Column(1).Width = 20.0;
-                    ws.Column(2).Width = 12.0;
+                    ws.Column(2).Width = 20.0;
+                    ws.Column(1).Width = 12.0;
                     ws.Column(3).Width = 60.0;
                     ws.Column(4).Width = 10.0;
-                    ws.Column(5).Width = 7.0;
-                    ws.Column(6).Width = 15.0;
-                    ws.Column(7).Width = 40.0;
-                    ws.Column(8).Width = 80.0;
+                    ws.Column(5).Width = 10.0;
+                    ws.Column(6).Width = 10.0;
+                    ws.Column(7).Width = 15.0;
+                    ws.Column(8).Width = 40.0;
+                    ws.Column(9).Width = 80.0;
+
 
                     // Set alignment
-                    for (int i = 2; i <= 8; i++)
+                    for (int i = 1; i <= 9; i++)
                     {
+                        if (i == 2) { continue; }
                         ws.Column(i).Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                         ws.Column(i).Style.HorizontalAlignment =
-                            i < 7 ? ExcelHorizontalAlignment.Center : ExcelHorizontalAlignment.Left;
+                            (i != 3 && i < 8) ? ExcelHorizontalAlignment.Center : ExcelHorizontalAlignment.Left;
                     }
 
 
@@ -303,14 +308,14 @@ namespace AliGrabApp.ViewModels
                             {
                                 if (img != null)
                                 {
-                                    var cellHeight = 100.0;                                         // magic number
-                                                                                                    // Set row height to accommodate the picture
+                                    var cellHeight = 100.0;                                         
+                                                                                                   
                                     ws.Row(rowNo).Height = cellHeight;
 
                                     // Add picture to cell
                                     var pic = ws.Drawings.AddPicture("Picture" + rowNo, img);
                                     // Position picture on desired column
-                                    pic.From.Column = 0;
+                                    pic.From.Column = 1;
                                     pic.From.Row = rowNo - 1;
                                     // Set picture size to fit inside the cell
                                     int imageWidth = (int)(img.Width * cellHeight / img.Height);
@@ -320,11 +325,20 @@ namespace AliGrabApp.ViewModels
                             }
                         }
 
-                        
-                        ws.Cells[rowNo, 2].Value = item.Title;
-                        ws.Cells[rowNo, 3].Value = item.Price;
-                        ws.Cells[rowNo, 4].Value = item.PriceCurrency;
-                        ws.Cells[rowNo, 5].Value = item.Unit;
+                        ws.Cells[rowNo, 1].Style.WrapText = true;
+                        ws.Cells[rowNo, 3].Style.WrapText = true;
+                        ws.Cells[rowNo, 4].Style.WrapText = true;
+                        ws.Cells[rowNo, 5].Style.WrapText = true;
+                        ws.Cells[rowNo, 6].Style.WrapText = true;
+                        ws.Cells[rowNo, 7].Style.WrapText = true;
+                        ws.Cells[rowNo, 8].Style.WrapText = true;
+                        ws.Cells[rowNo, 9].Style.WrapText = true;
+
+                        ws.Cells[rowNo, 1].Value = item.No;
+                        ws.Cells[rowNo, 3].Value = item.Title;
+                        ws.Cells[rowNo, 4].Value = item.Price;
+                        ws.Cells[rowNo, 5].Value = item.PriceCurrency;
+                        ws.Cells[rowNo, 6].Value = item.Unit;
                         ws.Cells[rowNo, 7].Value = item.Seller;
                         ws.Cells[rowNo, 8].Value = item.Description;
                         ws.Cells[rowNo, 9].Value = item.Link;
@@ -333,7 +347,7 @@ namespace AliGrabApp.ViewModels
                         // Set progress bar value
                         counter++;
                         int percent = (int)(Convert.ToDouble(counter) / Convert.ToDouble(itemsCount) * 100);
-                        _bw2.ReportProgress(percent, String.Format("Items exporting to Excel {0} of {1}", counter, itemsCount));
+                        _bw2.ReportProgress(percent, String.Format("Exporting to Excel item(s) {0} of {1}", counter, itemsCount));
 
                         // Check for background worker cancelation
                         if (_bw2.CancellationPending)
@@ -379,7 +393,7 @@ namespace AliGrabApp.ViewModels
                 MessageBox.Show("Imposible to export data to an Excel file. \n \n" +
                                 "- Maybe you don't have permission to write the data in the selected " +
                                 "folder. Try saving the file to a different directory." +
-                                "- Perhaps the data is corrupted. Try to repeat your search request." +
+                                "- Perhaps the data is corrupted. Try to repeat your search request. \n" +
                                 ex.Message,
                                 "Error!",
                                 MessageBoxButton.OK,

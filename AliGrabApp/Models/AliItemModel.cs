@@ -27,6 +27,7 @@ namespace AliGrabApp.Models
     public class AliItem : INotifyPropertyChanged
     {
         private Guid _id;
+        private long _no;
         private string _title;
         private string _price;
         private string _priceCurrency;
@@ -44,7 +45,20 @@ namespace AliGrabApp.Models
                 if (_id != value)
                 {
                     _id = value;
-                    RaisePropertyChanged("Id");
+                    RaisePropertyChanged(nameof(Id));
+                }
+            }
+        }
+
+        public long No
+        {
+            get { return _no; }
+            set
+            {
+                if (_no != value)
+                {
+                    _no = value;
+                    RaisePropertyChanged(nameof(No));
                 }
             }
         }
@@ -57,7 +71,7 @@ namespace AliGrabApp.Models
                 if (_image != value)
                 {
                     _image = value;
-                    RaisePropertyChanged("Image");
+                    RaisePropertyChanged(nameof(Image));
                 }
             }
         }
@@ -70,7 +84,7 @@ namespace AliGrabApp.Models
                 if (_title != value)
                 {
                     _title = value;
-                    RaisePropertyChanged("Title");
+                    RaisePropertyChanged(nameof(Title));
                 }
             }
         }
@@ -83,7 +97,7 @@ namespace AliGrabApp.Models
                 if (_price != value)
                 {
                     _price = value;
-                    RaisePropertyChanged("Price");
+                    RaisePropertyChanged(nameof(Price));
                 }
             }
         }
@@ -96,7 +110,7 @@ namespace AliGrabApp.Models
                 if (_priceCurrency != value)
                 {
                     _priceCurrency = value;
-                    RaisePropertyChanged("PriceCurrency");
+                    RaisePropertyChanged(nameof(PriceCurrency));
                 }
             }
         }
@@ -109,7 +123,7 @@ namespace AliGrabApp.Models
                 if (_unit != value)
                 {
                     _unit = value;
-                    RaisePropertyChanged("Unit");
+                    RaisePropertyChanged(nameof(Unit));
                 }
             }
         }
@@ -122,7 +136,7 @@ namespace AliGrabApp.Models
                 if (_seller != value)
                 {
                     _seller = value;
-                    RaisePropertyChanged("Seller");
+                    RaisePropertyChanged(nameof(Seller));
                 }
             }
         }
@@ -135,7 +149,7 @@ namespace AliGrabApp.Models
                 if (_description != value)
                 {
                     _description = value;
-                    RaisePropertyChanged("Description");
+                    RaisePropertyChanged(nameof(Description));
                 }
             }
         }
@@ -148,7 +162,7 @@ namespace AliGrabApp.Models
                 if (_link != value)
                 {
                     _link = value;
-                    RaisePropertyChanged("Link");
+                    RaisePropertyChanged(nameof(Link));
                 }
             }
         }

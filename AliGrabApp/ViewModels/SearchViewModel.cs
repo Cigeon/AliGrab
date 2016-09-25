@@ -144,33 +144,7 @@ namespace AliGrabApp.ViewModels
                     foreach (var item in pageItems)
                     {
                         tmpItems.Add(item);
-                    }
-
-                    //var tries = 0;
-                    //var maxTries = 3;
-                    //while (true)
-                    //{
-                    //    try
-                    //    {
-                    //        var task = GetItemsFromPage(document, itemsCount);
-                    //        var pageItems = task.Result;
-                    //        foreach (var item in pageItems)
-                    //        {
-                    //            AliItems.Add(item);
-                    //        }
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        Debug.WriteLine("Repeat web request to " + url);
-                    //        if (tries >= maxTries)
-                    //        {
-                    //            Debug.WriteLine("Broken url: " + url);
-                    //            BrokenUrls.Add(url);
-                    //            break;                                
-                    //        }
-                    //        tries++;
-                    //    }
-                    //}                    
+                    }                  
 
                     // Copy grabbed items to collection
                     foreach (var item in tmpItems)
@@ -198,8 +172,8 @@ namespace AliGrabApp.ViewModels
                 catch (AggregateException ex)
                 {
                     Debug.WriteLine("Repeat web request to ");
-                    // Not calculate unadded items
-                    _itemNo -= _currItemNo + 2;
+                    // Doesn't add items
+                    _itemNo -= _currItemNo;
                 }
             }
         }
@@ -240,34 +214,6 @@ namespace AliGrabApp.ViewModels
             itemClient.Encoding = Encoding.UTF8;
             var itemPage = await itemClient.DownloadStringTaskAsync(url);
             return itemPage;
-
-            //var itemPage = "";
-            //var tries = 0;
-            //var maxTries = 3;
-            //while (true)
-            //{
-            //    try
-            //    {
-            //        // Get web page source code
-            //        var itemClient = new WebClient();
-            //        itemClient.Encoding = Encoding.UTF8;
-            //        itemPage = await itemClient.DownloadStringTaskAsync(url);
-            //        break;
-            //    }
-            //    catch (AggregateException ex)
-            //    {
-            //        Debug.WriteLine("Repeat web request to " + url);
-            //        if (tries >= maxTries)
-            //        {
-            //            Debug.WriteLine("Broken url: " + url);
-            //            BrokenUrls.Add(url);
-            //            break;
-            //        }
-            //        tries++;
-            //    }
-            //}
-
-            //return itemPage;
         }
 
         private IHtmlDocument RetrievePageProxy(string url)
@@ -398,9 +344,13 @@ namespace AliGrabApp.ViewModels
                 // Check if item exist
                 if (aliItem != null)
                 {
-                    aliItems.Add(aliItem);
                     _currItemNo++;
                     _itemNo++;
+                    aliItem.No = _itemNo;
+                    aliItems.Add(aliItem);
+
+                    Debug.WriteLine("-- Item No: " + aliItem.No);              
+                    
                 }
                 else
                 {
@@ -409,9 +359,7 @@ namespace AliGrabApp.ViewModels
 
                 // Set progress bar value
                 int percent = (int)(Convert.ToDouble(_itemNo) / Convert.ToDouble(itemsCount) * 100);
-                _bw.ReportProgress(percent, String.Format("Items grabbing {0} of {1}", _itemNo, itemsCount));
-                //_bw.ReportProgress(percent, String.Format("Proxy [" + CurrentProxy.Ip + ":" + CurrentProxy.Port + "]"
-                //                                            + "  Items grabbing   {0} of {1}", _itemNo, itemsCount));
+                _bw.ReportProgress(percent, String.Format("Grabbing item(s) {0} of {1}", _itemNo, itemsCount));
 
             }
 
@@ -432,7 +380,6 @@ namespace AliGrabApp.ViewModels
                 querySelector = "div.lazy-load > ul > li > div.item > div.img > div.pic > a.picRind";
             }
 
-            //var prodRawLinks = document.QuerySelectorAll("div.item > div.img > div.pic > a.picRind");
             var prodRawLinks = document.QuerySelectorAll(querySelector);
             foreach (var link in prodRawLinks)
             {                
@@ -450,17 +397,6 @@ namespace AliGrabApp.ViewModels
 
             // Greate aukro item for storing data
             var aliItem = new AliItem();
-
-            //// Get all data
-            //// check for expired item
-            //var expire = document.QuerySelectorAll("#timeLeftCounter")
-            //    .First()
-            //    .Text();
-
-            //if (expire == "завершен")            
-            //{
-            //    return null;
-            //}
 
             // Title
             aliItem.Title = document.QuerySelectorAll("div.detail-wrap > h1.product-name")
@@ -526,6 +462,7 @@ namespace AliGrabApp.ViewModels
             }
             catch (WebException)
             {
+                Debug.WriteLine("Image load fault");
                 // load default image
                 aliItem.Image = new WebClient().DownloadData("http://static.allegrostatic.pl/site_images/209/0/layout/showItemNoPhoto.png");
             }

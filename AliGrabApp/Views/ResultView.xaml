@@ -39,6 +39,21 @@
                 <system:String x:Key="GoToSite">Open in browser</system:String>
             </DataGrid.Resources>
             <DataGrid.Columns >
+
+                <DataGridTemplateColumn Header="No" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox IsReadOnly="True" 
+                                     Text="{Binding No, Mode=OneWay}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Margin="10"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
                 <DataGridTemplateColumn Header="Image" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

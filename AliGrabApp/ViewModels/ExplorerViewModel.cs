@@ -154,11 +154,14 @@ namespace AliGrabApp.ViewModels
                 var ai = AliGroups.First(g => g.Id.Equals(param)).Items;
 
                 // Convert AukroItemModel to AukroItem
+                var itemNo = 0;
                 foreach (var item in ai)
                 {
+                    itemNo++;
                     aliItems.Add(new AliItem
                     {
                         Id = item.Id,
+                        No = itemNo,
                         Title = item.Title,
                         Price = item.Price,
                         PriceCurrency = item.PriceCurrency,
