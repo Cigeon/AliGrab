@@ -13,7 +13,7 @@ namespace AliGrabApp.Models
     public class AliGroupModel
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
         public DateTime? Created { get; set; }
@@ -21,6 +21,11 @@ namespace AliGrabApp.Models
         public string Name { get; set; }
 
         public ObservableCollection<AliItemModel> Items { get; set; }
+
+        public AliGroupModel()
+        {
+            Id = Guid.NewGuid();
+        }
     }
 
     public class AliGroup
@@ -29,6 +34,11 @@ namespace AliGrabApp.Models
         private DateTime? _created;
         private string _name;
         private ObservableCollection<AliItemModel> _items;
+
+        public AliGroup()
+        {
+            Id = Guid.NewGuid();
+        }
 
         public Guid Id
         {

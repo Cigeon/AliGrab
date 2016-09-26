@@ -12,7 +12,7 @@ namespace AliGrabApp.Models
     public class AliItemModel
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
         public string Title { get; set; }        
         public string Price { get; set; }
@@ -21,7 +21,13 @@ namespace AliGrabApp.Models
         public string Seller { get; set; }
         public string Link { get; set; }
         public string Description { get; set; }
+        [MaxLength]
         public byte[] Image { get; set; }
+
+        public AliItemModel()
+        {
+            Id = Guid.NewGuid();
+        }
     }
 
     public class AliItem : INotifyPropertyChanged
@@ -36,6 +42,11 @@ namespace AliGrabApp.Models
         private string _link;
         private string _description;
         private byte[] _image;
+
+        public AliItem()
+        {
+            Id = Guid.NewGuid();
+        }
 
         public Guid Id
         {

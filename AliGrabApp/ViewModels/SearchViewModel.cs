@@ -107,10 +107,12 @@ namespace AliGrabApp.ViewModels
                 {
                     // Get html document with items
                     var page = RetrievePage(url);
+                    //var page = RetrievePageProxy(url);
 
                     // Generate structured document
                     var parser = new HtmlParser();
                     var document = parser.Parse(page);
+                    //var document = page;
 
                     // Get items count
                     if (!itemsCountFinded)
@@ -294,7 +296,7 @@ namespace AliGrabApp.ViewModels
             // Get link to the next page
             try
             {
-                url = "http:";
+                url = "https:";
                 url += document.QuerySelectorAll("a.page-next")
                     .First()
                     .GetAttribute("href");
@@ -383,7 +385,7 @@ namespace AliGrabApp.ViewModels
             var prodRawLinks = document.QuerySelectorAll(querySelector);
             foreach (var link in prodRawLinks)
             {                
-                yield return "http:" + link.GetAttribute("href");
+                yield return "https:" + link.GetAttribute("href");
             }
         }
 
